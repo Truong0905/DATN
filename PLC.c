@@ -24,11 +24,11 @@ int main(void)
     fptest = ConvFrTxtFile(&row);
     ConvFrList(fptest, row);
     ListFinal();
-     BranchWithFirst_F();
+    BranchWithFirst_F();
     p = First_F;
     while (p != NULL)
     {
-        printf("%s\n", p->data);
+        printf("%s ", p->data);
         p = p->next;
     }
     fclose(fptest);
@@ -277,8 +277,8 @@ void ListFinal(void)
 void BranchWithFirst_F(void)
 {
     LinkList *p, *k, *r, *z; // p dungf duyệt danh sách , q là biến tạm thời lưu dữ liệu
-    int cout1 = 0 ; // Đếm số "("
-    int cout2 = 0 ;// Đếm số ")"
+    int cout1 = 0;           // Đếm số "("
+    int cout2 = 0;           // Đếm số ")"
     p = First_F;
     while (p != NULL)
     {
@@ -287,7 +287,7 @@ void BranchWithFirst_F(void)
             k = (LinkList *)malloc(sizeof(LinkList));
             k->data = (char *)calloc(1, sizeof(char));
             k->data[0] = '(';
-            cout1 ++ ;
+            cout1++;
             k->next = p;
             p->prev = k;
             k->prev = NULL;
@@ -295,90 +295,86 @@ void BranchWithFirst_F(void)
         }
         else
         {
-            if ((strcmp(p->data,"ALD") == 0) || (strcmp(p->data,"OLD") == 0) || (strcmp(p->data,"TON") == 0) || (strcmp(p->data,"CTU") == 0) )
+            if ((strcmp(p->data, "ALD") == 0) || (strcmp(p->data, "OLD") == 0) || (strcmp(p->data, "TON") == 0) || (strcmp(p->data, "CTU") == 0))
+            {
+                r = p->prev;
+                k = (LinkList *)malloc(sizeof(LinkList));
+                k->data = (char *)calloc(1, sizeof(char));
+                k->data[0] = ')';
+                cout2++;
+                r->next = k;
+                k->prev = r;
+                k->next = p;
+                p->prev = k;
+            }
+            else if ((strcmp(p->data, "=") == 0))
+            {
+                if (cout1 > cout2)
                 {
-                    r = p->prev ;
+                    r = p->prev;
                     k = (LinkList *)malloc(sizeof(LinkList));
                     k->data = (char *)calloc(1, sizeof(char));
                     k->data[0] = ')';
-                    cout2 ++ ;
-                    r->next = k ;
-                    k->prev = r ;
-                    k->next = p ;
-                    p->prev = k ;
-
+                    cout2++;
+                    r->next = k;
+                    k->prev = r;
+                    k->next = p;
+                    p->prev = k;
                 }
-            else if ( (strcmp(p->data,"=") == 0) )
+            }
+            else if ((strcmp(p->data, "LD") == 0) || (strcmp(p->data, "LDN") == 0))
+            {
+                r = p->prev;
+                z = r->prev;
+                if ((strcmp(z->data, "=") == 0) || (strcmp(r->data, "N") == 0) || (strcmp(r->data, "ALD") == 0) || (strcmp(r->data, "OLD") == 0))
                 {
-                    if( cout1 > cout2)
-                        {
-                             r = p->prev ;
                     k = (LinkList *)malloc(sizeof(LinkList));
                     k->data = (char *)calloc(1, sizeof(char));
-                    k->data[0] = ')';
-                    cout2 ++ ;
-                    r->next = k ;
-                    k->prev = r ;
-                    k->next = p ;
-                    p->prev = k ;
-                        }
+                    k->data[0] = '(';
+                    cout1++;
+                    r->next = k;
+                    k->prev = r;
+                    k->next = p;
+                    p->prev = k;
                 }
-            else if (   (strcmp(p->data,"LD") == 0) || (strcmp(p->data,"LDN") == 0)  )
+                else
                 {
-                    r= p->prev ;
-                    z =r->prev ;
-                    if (  (strcmp(z->data,"=") == 0) || (strcmp(r->data,"N") == 0) || (strcmp(r->data,"ALD") == 0) || (strcmp(r->data,"OLD") == 0) )
-                        {
-                              k = (LinkList *)malloc(sizeof(LinkList));
-                                k->data = (char *)calloc(1, sizeof(char));
-                                k->data[0] = '(';
-                                cout1 ++ ;
-                                r->next = k ;
-                                k->prev = r ;
-                                k->next = p ;
-                                p->prev = k ;
-                        }
-                    else 
-                        {
-                            if (  cout1 == cout2  )
-                                {
-                                    k = (LinkList *)malloc(sizeof(LinkList));
-                                    k->data = (char *)calloc(1, sizeof(char));
-                                    k->data[0] = '(';
-                                    cout1 ++ ;
-                                    r->next = k ;
-                                    k->prev = r ;
-                                    k->next = p ;
-                                    p->prev = k ;
-                                }
-                            else
-                                {
-                                    k = (LinkList *)malloc(sizeof(LinkList));
-                                    k->data = (char *)calloc(1, sizeof(char));
-                                    k->data[0] = ')';
-                                    cout1 ++ ;
-                                    r->next = k ;
-                                    k->prev = r ;
-                                    k->next = p ;
-                                    p->prev = k ;
+                    if (cout1 == cout2)
+                    {
+                        k = (LinkList *)malloc(sizeof(LinkList));
+                        k->data = (char *)calloc(1, sizeof(char));
+                        k->data[0] = '(';
+                        cout1++;
+                        r->next = k;
+                        k->prev = r;
+                        k->next = p;
+                        p->prev = k;
+                    }
+                    else
+                    {
+                        k = (LinkList *)malloc(sizeof(LinkList));
+                        k->data = (char *)calloc(1, sizeof(char));
+                        k->data[0] = ')';
+                        cout1++;
+                        r->next = k;
+                        k->prev = r;
+                        k->next = p;
+                        p->prev = k;
 
-                                    r= p->prev ;
-                                    z =r->prev ;
-                                     k = (LinkList *)malloc(sizeof(LinkList));
-                                    k->data = (char *)calloc(1, sizeof(char));
-                                    k->data[0] = '(';
-                                    cout2 ++ ;
-                                    r->next = k ;
-                                    k->prev = r ;
-                                    k->next = p ;
-                                    p->prev = k ;
-
-                            
-
-                                }
-                        }
+                        r = p->prev;
+                        z = r->prev;
+                        k = (LinkList *)malloc(sizeof(LinkList));
+                        k->data = (char *)calloc(1, sizeof(char));
+                        k->data[0] = '(';
+                        cout2++;
+                        r->next = k;
+                        k->prev = r;
+                        k->next = p;
+                        p->prev = k;
+                    }
                 }
+            }
         }
-        p= p->next ;
+        p = p->next;
     }
 }
