@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
-
+// Hello git ABC
 FILE *ConvFrTxtFile(uint32_t *row); // Tạo và đọc địa chỉ file TXT đã xóa comment
 struct Link
 {
@@ -12,16 +12,28 @@ struct Link
 
 }; // Cấu trúc 1 phần tử
 typedef struct Link LinkList;
-
-LinkList *First, *Last, *First_F, *Last_F;
-
-LinkList *GetLink(char *data)
+LinkList *First, *Last, *First_F, *Last_F;          // First và Last dùng cho  ConvFrList ()   ; First_F , Last_F  là chuỗi cuối cùng cần tìm
+void ConvFrList(FILE *fopen, uint32_t Row_Of_File); // Chuyển về List 1 gồm tập hợp các ký tự có loại bỏ các ký tự ko cần thiết
+void ListFinal(void);                               // Gom các ký tự câu lệnh (biến) vào 1 data , bổ sung H vào biến thường đóng , bổ xung "sl" nếu là suòn lên hoặc "sx" nếu là sườn xuống
+void BranchWithFirst_F(void);                       // Tách nhánh . Nếu chưa phải là đầu ra thì cho vào ()
+int main(void)
 {
-    LinkList *p = (LinkList *)malloc(sizeof(struct Link));
-    strcpy(p->data, data);
-    return p;
+    FILE *fptest = NULL;
+    LinkList *p;
+    uint32_t row = 0U;
+    fptest = ConvFrTxtFile(&row);
+    ConvFrList(fptest, row);
+    ListFinal();
+     BranchWithFirst_F();
+    p = First_F;
+    while (p != NULL)
+    {
+        printf("%s\n", p->data);
+        p = p->next;
+    }
+    fclose(fptest);
+    return 0;
 }
-
 FILE *ConvFrTxtFile(uint32_t *Row_Of_File)
 {
     FILE *fp = NULL, *fp1 = NULL;
@@ -29,11 +41,11 @@ FILE *ConvFrTxtFile(uint32_t *Row_Of_File)
     char arr[20];
 
     fp1 = fopen("PLC.txt", "w");
-    // Mở file hàm fopen
+    // Mở file bằn hàm fopen
     fp = fopen("PLC.awl", "r");
     if (fp == NULL)
     {
-        printf("Cannot open file");
+        printf("Can not open file");
         return NULL;
     }
 
@@ -262,98 +274,111 @@ void ListFinal(void)
     }
 }
 
-void Branch(FILE *listxl)
+void BranchWithFirst_F(void)
 {
-    int numNP = 0;
-    int numNT = 0;
-    LinkList *p = First_F;
-
+    LinkList *p, *k, *r, *z; // p dungf duyệt danh sách , q là biến tạm thời lưu dữ liệu
+    int cout1 = 0 ; // Đếm số "("
+    int cout2 = 0 ;// Đếm số ")"
+    p = First_F;
     while (p != NULL)
     {
-        if (strcmp(p->data, "ALD") == 0 || strcmp(p->data, "OLD") == 0 || strcmp(p->data, "TON") == 0 || strcmp(p->data, "CTU") == 0)
+        if (p == First_F) // Thêm ký tự '(' vào đầu
         {
-            if (numNT > numNP)
-            {
-                fprintf(listxl, "'%c'", ')');
-                fprintf(listxl, "%c", ',');
-                fprintf(listxl, "'%s'", p->data);
-                fprintf(listxl, "%c", ',');
-                numNP++;
-            }
-            else
-            {
-                fprintf(listxl, "'%s'", p->data);
-            }
-        }
-        else if (strcmp(p->data, "=") == 0)
-        {
-            if (numNT > numNP)
-            {
-                 fprintf(listxl, "'%c'", ')');
-                fprintf(listxl, "%c", ',');
-                
-                fprintf(listxl, "'%s'", p->data);
-                fprintf(listxl, "%c", ',');
-            }
-            else
-            {
-                fprintf(listxl, "'%s'", p->data);
-            }
-        }
-        else if (strcmp(p->data, "LD") == 0 || strcmp(p->data, "LDN") == 0)
-        {
-
-            if (p == First_F || strcmp(p->prev->data, "N") == 0 || strcmp(p->prev->data, "ALD") == 0 || strcmp(p->prev->data, "OLD") == 0 || strcmp(p->prev->prev->data, "=") == 0)
-            {
-                fprintf(listxl, "'%c'", '(');
-                fprintf(listxl, "'%s'", p->data);
-                numNT++;
-            }
-            else
-            {
-                if (numNT == numNP)
-                {
-                    fprintf(listxl, "'%c'", '(');
-                    fprintf(listxl, "'%s'", p->data);
-                    numNT++;
-                }
-                else
-                {
-                    fprintf(listxl, "'%c'", ')');
-                    fprintf(listxl, "'%c'", '(');
-                    fprintf(listxl, "'%s'", p->data);
-                    numNP++;
-                    numNT++;
-                }
-            }
+            k = (LinkList *)malloc(sizeof(LinkList));
+            k->data = (char *)calloc(1, sizeof(char));
+            k->data[0] = '(';
+            cout1 ++ ;
+            k->next = p;
+            p->prev = k;
+            k->prev = NULL;
+            First_F = k;
         }
         else
         {
-            fprintf(listxl, "'%s'", p->data);
+            if ((strcmp(p->data,"ALD") == 0) || (strcmp(p->data,"OLD") == 0) || (strcmp(p->data,"TON") == 0) || (strcmp(p->data,"CTU") == 0) )
+                {
+                    r = p->prev ;
+                    k = (LinkList *)malloc(sizeof(LinkList));
+                    k->data = (char *)calloc(1, sizeof(char));
+                    k->data[0] = ')';
+                    cout2 ++ ;
+                    r->next = k ;
+                    k->prev = r ;
+                    k->next = p ;
+                    p->prev = k ;
+
+                }
+            else if ( (strcmp(p->data,"=") == 0) )
+                {
+                    if( cout1 > cout2)
+                        {
+                             r = p->prev ;
+                    k = (LinkList *)malloc(sizeof(LinkList));
+                    k->data = (char *)calloc(1, sizeof(char));
+                    k->data[0] = ')';
+                    cout2 ++ ;
+                    r->next = k ;
+                    k->prev = r ;
+                    k->next = p ;
+                    p->prev = k ;
+                        }
+                }
+            else if (   (strcmp(p->data,"LD") == 0) || (strcmp(p->data,"LDN") == 0)  )
+                {
+                    r= p->prev ;
+                    z =r->prev ;
+                    if (  (strcmp(z->data,"=") == 0) || (strcmp(r->data,"N") == 0) || (strcmp(r->data,"ALD") == 0) || (strcmp(r->data,"OLD") == 0) )
+                        {
+                              k = (LinkList *)malloc(sizeof(LinkList));
+                                k->data = (char *)calloc(1, sizeof(char));
+                                k->data[0] = '(';
+                                cout1 ++ ;
+                                r->next = k ;
+                                k->prev = r ;
+                                k->next = p ;
+                                p->prev = k ;
+                        }
+                    else 
+                        {
+                            if (  cout1 == cout2  )
+                                {
+                                    k = (LinkList *)malloc(sizeof(LinkList));
+                                    k->data = (char *)calloc(1, sizeof(char));
+                                    k->data[0] = '(';
+                                    cout1 ++ ;
+                                    r->next = k ;
+                                    k->prev = r ;
+                                    k->next = p ;
+                                    p->prev = k ;
+                                }
+                            else
+                                {
+                                    k = (LinkList *)malloc(sizeof(LinkList));
+                                    k->data = (char *)calloc(1, sizeof(char));
+                                    k->data[0] = ')';
+                                    cout1 ++ ;
+                                    r->next = k ;
+                                    k->prev = r ;
+                                    k->next = p ;
+                                    p->prev = k ;
+
+                                    r= p->prev ;
+                                    z =r->prev ;
+                                     k = (LinkList *)malloc(sizeof(LinkList));
+                                    k->data = (char *)calloc(1, sizeof(char));
+                                    k->data[0] = '(';
+                                    cout2 ++ ;
+                                    r->next = k ;
+                                    k->prev = r ;
+                                    k->next = p ;
+                                    p->prev = k ;
+
+                            
+
+                                }
+                        }
+                }
         }
-
-        p = p->next;
+        p= p->next ;
     }
-}
-
-
-int main(void)
-{
-    uint32_t row = 0U;
-    FILE *fptest = ConvFrTxtFile(&row);
-    FILE *listxl = fopen("listxl.txt", "w");
-
-    if (listxl == NULL)
-    {
-        printf("open file not succesfully");
-        return -1;
-    }
-
-    ConvFrList(fptest, row);
-    ListFinal();
-    Branch(listxl);
-
-    fclose(listxl);
-    fclose(fptest);
-    return 0;
 }
