@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
-// Hello git ABC
+// Hello git ABC     aaaaaaaa
 FILE *ConvFrTxtFile(uint32_t *row); // Tạo và đọc địa chỉ file TXT đã xóa comment
 struct Link
 {
