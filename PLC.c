@@ -15,7 +15,7 @@ typedef struct Link LinkList;
 LinkList *First, *Last, *First_F, *Last_F;          // First và Last dùng cho  ConvFrList ()   ; First_F , Last_F  là chuỗi cuối cùng cần tìm
 void ConvFrList(FILE *fopen, uint32_t Row_Of_File); // Chuyển về List 1 gồm tập hợp các ký tự có loại bỏ các ký tự ko cần thiết
 void ListFinal(void);                               // Gom các ký tự câu lệnh (biến) vào 1 data , bổ sung H vào biến thường đóng , bổ xung "sl" nếu là suòn lên hoặc "sx" nếu là sườn xuống
-void BranchWithFirst_F(void);                       // Tách nhánh . Nếu chưa phải là đầu ra thì cho vào ()
+void BranchWithFirst_F(void);                       // Tách nhánh 
 int main(void)
 {
     FILE *fptest = NULL;
@@ -145,23 +145,24 @@ void ListFinal(void)
     p = First;
     First_F = NULL;
     int a = 0; // Đếm size token
-    int b = 0; // Xác định tiếp điểm thường đóng , sườn lên , sườn xuống
+    int b = 0; // Xác định tiếp điểm thường đóng 
     while (p != NULL)
     {
         char *token = strtok(p->data, " ");
         while (token != NULL)
-        {
+        {   
+            // tính kịc thước token để tạo vùng nhớ cho  dữ liệu của phần tử mới
             a = strlen(token);
-
+            // cấp phát vùng nhớ cho phần tử
             q = (LinkList *)malloc(sizeof(LinkList));
 
             q->next = NULL;
-            if (b == 0)
-            {
+            if (b == 0) // Nếu ko phải là  tiếp điểm thường đóng  ta copy token vào phần tử
+            {   
                 q->data = (char *)calloc(a, sizeof(char));
                 strcpy(q->data, token);
             }
-            else
+            else  // Nếu là tiếp điểm thuoơngf đóng thì tăng size dữ liệu lên 1 nữa để lưu Token và ký tự 'H'
             {
                 q->data = (char *)calloc(a + 1, sizeof(char));
                 for (int i = 0; i < a; i++)
@@ -171,7 +172,7 @@ void ListFinal(void)
                 (q->data)[a] = 'H';
                 b = 0;
             }
-
+            /// Lưu địa chỉ con trỏ First_ và con trỏ Last_F
             if (First_F == NULL)
             {
                 q->prev = NULL;
@@ -185,17 +186,19 @@ void ListFinal(void)
                 q->prev = k;
                 Last_F = q;
             }
-
+            // xác định xem có phải tiếp điểm thường đóng không bằng cách kiểm tra câu lệnh là sau đó gán b=1 để lần sau thêm 'H'
             if (strncmp(token, "LDN", 3) == 0 || strncmp(token, "AN", 2) == 0 || strncmp(token, "ON", 2) == 0)
             {
                 b = 1;
             }
+
+            // Nếu là xung sườn lên ta thêm "sl" vào sau biến bằng cách tạo 1 phần tử mới thế vào vị trí của phần tử cũ và xóa phần tử cũ đi
             if (strncmp(token, "EU", 2) == 0)
             {
                 LinkList *r1, *r2, *r3;
                 r1 = q->prev;
                 r2 = r1->prev; // r1 = i0.0 => r2 = ld
-                if (r2->prev == NULL)
+                if (r2->prev == NULL) // Nếu EU là câu lệnh thứ 3 tính từ đầu Chương trình 
                 {
                     r3 = (LinkList *)malloc(sizeof(LinkList));
                     r3->next = r1->next;
@@ -210,7 +213,7 @@ void ListFinal(void)
                     (r3->data)[a + 1] = 'l';
                     free(r1);
                 }
-                else
+                else    // // Nếu EU ko phải là câu lệnh thứ 3 tính từ đầu Chương trình 
                 {
                     r1 = r2->prev;
                     r2 = r1->prev;
@@ -228,13 +231,14 @@ void ListFinal(void)
                     free(r1);
                 }
             }
+              // Nếu là xung sườn xuống  ta thêm "sx" vào sau biến bằng cách tạo 1 phần tử mới thế vào vị trí của phần tử cũ và xóa phần tử cũ đi
             if (strncmp(token, "ED", 2) == 0)
             {
                 LinkList *r1, *r2, *r3;
                 r1 = q->prev;
                 r2 = r1->prev;
 
-                if (r2->prev == NULL)
+                if (r2->prev == NULL)   // Nếu ED là câu lệnh thứ 3 tính từ đầu Chương trình
                 {
                     r3 = (LinkList *)malloc(sizeof(LinkList));
                     r3->next = r1->next;
@@ -249,7 +253,7 @@ void ListFinal(void)
                     (r3->data)[a + 1] = 'l';
                     free(r1);
                 }
-                else
+                else        // // Nếu ED không phải là câu lệnh thứ 3 tính từ đầu Chương trình
                 {
                     r1 = r2->prev;
                     r2 = r1->prev;
@@ -295,7 +299,7 @@ void BranchWithFirst_F(void)
         }
         else
         {
-            if ((strcmp(p->data, "ALD") == 0) || (strcmp(p->data, "OLD") == 0) || (strcmp(p->data, "TON") == 0) || (strcmp(p->data, "CTU") == 0))
+            if ((strcmp(p->data, "ALD") == 0) || (strcmp(p->data, "OLD") == 0) || (strcmp(p->data, "TON") == 0) || (strcmp(p->data, "CTU") == 0)  || (strcmp(p->data, "CTD") == 0)  || (strcmp(p->data, "CTUD") == 0))
             {
                 r = p->prev;
                 k = (LinkList *)malloc(sizeof(LinkList));
@@ -322,7 +326,7 @@ void BranchWithFirst_F(void)
                     p->prev = k;
                 }
             }
-            else if ((strcmp(p->data, "LD") == 0) || (strcmp(p->data, "LDN") == 0))
+            else if ((strncmp(p->data, "LD",2) == 0))
             {
                 r = p->prev;
                 z = r->prev;
@@ -374,6 +378,21 @@ void BranchWithFirst_F(void)
                     }
                 }
             }
+            else if ((strncmp(p->data, "MOV",3) == 0))
+                {
+                    r= p->prev ;
+                    if ((strcmp(r->data, "ALD") != 0) && (strcmp(r->data, "OLD") != 0) && (strcmp(r->data, "AENO") != 0)  )
+                    {
+                            k = (LinkList *)malloc(sizeof(LinkList));
+                            k->data = (char *)calloc(1, sizeof(char));
+                            k->data[0] = ')';
+                            cout2++;
+                            r->next = k;
+                            k->prev = r;
+                            k->next = p;
+                            p->prev = k;
+                    }
+                }
         }
         p = p->next;
     }
