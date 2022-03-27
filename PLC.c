@@ -399,8 +399,10 @@ void Final_File_text(void)
             {   int size_of_OUT = sizeof (OUT) ;
                 if (strncmp(pNEXT->data, ")", 1) == 0 )
                 {
-                    char *arr = "?";
-                OUT = str_alloc_and_insert(OUT, arr);
+                     char *arr = "(";
+                     OUT = str_alloc_and_insert(OUT, arr);
+                    char *arr2 = "?";
+                OUT = str_alloc_and_insert(OUT, arr2);
                 char *arr1 = "(";
                 OUT = str_alloc_and_insert(OUT, arr1);
                 p = p->next;
@@ -423,9 +425,11 @@ void Final_File_text(void)
            
             pNEXT = p->next;
             if (strncmp(pNEXT->data, "(", 1) == 0)  // Nếu trước đó có dấu "(" thì thêm "?" vào giữa 2 dấu 
-            {
-                char *arr = "?";
+            {   
+                 char *arr = ")";
                 OUT = str_alloc_and_insert(OUT, arr);
+                char *arr2 = "?";
+                OUT = str_alloc_and_insert(OUT, arr2);
                 char *arr1 = "(";
                 OUT = str_alloc_and_insert(OUT, arr1);
                 p = pNEXT->next;
