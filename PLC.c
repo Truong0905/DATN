@@ -684,7 +684,7 @@ void Final_File_text(void)
             char *arr2 = ")";
             OUT = str_alloc_and_insert(OUT, arr2);
         }
-        else if (strcmp(p->data, "=") == 0)
+        else if (strcmp(p->data, "=") == 0)   //q0.1=(A*B)\n
         {
             char *arr1 = "(";
             char *arr2 = ")";
@@ -696,6 +696,51 @@ void Final_File_text(void)
             p = p->next;
             OUT = str_alloc_and_insert(p->data, OUT);
         }
+         else if (strcmp(p->data, "CTU") == 0)
+         {
+             // do some thing
+             char *arr1 = "(";
+            char *arr2 = ")";
+            OUT = str_alloc_and_insert(arr1, OUT);
+            OUT = str_alloc_and_insert(OUT, arr2);
+            char *arr3 = "\n"; 
+            OUT = str_alloc_and_insert(OUT, arr3); // OUT : = (a*b)\n
+         }
+         else if (strcmp(p->data, "CTD") == 0)
+         {
+              // do some thing
+                // do some thing
+             char *arr1 = "(";
+            char *arr2 = ")";
+            OUT = str_alloc_and_insert(arr1, OUT);
+            OUT = str_alloc_and_insert(OUT, arr2);
+            char *arr3 = "\n"; 
+            OUT = str_alloc_and_insert(OUT, arr3); // OUT : = (a*b)\n
+         }
+          else if (strcmp(p->data, "TON") == 0)
+         {
+              // do some thing
+                // do some thing
+             char *arr1 = "(";
+            char *arr2 = ")";
+            OUT = str_alloc_and_insert(arr1, OUT);
+            OUT = str_alloc_and_insert(OUT, arr2);
+            char *arr3 = "\n"; 
+            OUT = str_alloc_and_insert(OUT, arr3); // OUT : = (a*b)\n
+         }
+          else if (strcmp(p->data, "TOF") == 0)
+         {
+              // do some thing
+                // do some thing
+             char *arr1 = "(";
+            char *arr2 = ")";
+            OUT = str_alloc_and_insert(arr1, OUT);
+            OUT = str_alloc_and_insert(OUT, arr2);
+            char *arr3 = "\n"; 
+            OUT = str_alloc_and_insert(OUT, arr3); // OUT : = (a*b)\n
+         }
+
+
 
         p = p->next;
     }
