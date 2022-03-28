@@ -28,7 +28,7 @@ int main(void)
     ConvFrList(fptest, row);
     ListFinal();
     BranchWithFirst_F();
-    Final_File_text();
+    //Final_File_text();
     p = First_F;
     while (p != NULL)
     {
@@ -43,7 +43,8 @@ FILE *ConvFrTxtFile(uint32_t *Row_Of_File)
     FILE *fp = NULL, *fp1 = NULL;
 
     char arr[20];
-
+    int check = 0 ; // Kieemr tra xem vào network chưa 
+    int redution = 0 ;
     fp1 = fopen("PLC.txt", "w");
     // Mở file bằn hàm fopen
     fp = fopen("PLC.awl", "r");
@@ -59,7 +60,7 @@ FILE *ConvFrTxtFile(uint32_t *Row_Of_File)
     {
         *Row_Of_File = *Row_Of_File + 1;
 
-        if (*Row_Of_File > 5)
+        if (check ==1)
         {
 
             if (strncmp(arr, "Network", 7) == 0)
@@ -76,8 +77,13 @@ FILE *ConvFrTxtFile(uint32_t *Row_Of_File)
                 fputs(arr, fp1);
             }
         }
+        if (strncmp(arr,"Network 1",9 ) == 0)
+        {
+            check =1 ;
+            redution = *Row_Of_File ;
+        }
     }
-    *Row_Of_File = *Row_Of_File - 5;
+    *Row_Of_File = *Row_Of_File - redution;
 
     fclose(fp);
     fclose(fp1);
@@ -371,10 +377,11 @@ void BranchWithFirst_F(void)
 void Final_File_text(void)
 {
     LinkList *p, *pNEXT, *pNEXT1;
-
     FILE *pFile;
     char *OUT;
     int check = 0; // Kiểm tra xem hết 1 network chưa
+    int count = 0 ; // Đếm số dấu "?"
+    int check_1 = 0 ; // XÁc định "? " cuối
     pFile = fopen("PLC_F.txt", "w");
     p = First_F;
     while (p != NULL)
@@ -402,6 +409,8 @@ void Final_File_text(void)
                      char *arr = "(";
                      OUT = str_alloc_and_insert(OUT, arr);
                     char *arr2 = "?";
+                    count ++ ;
+                    check_1 ++ ; 
                 OUT = str_alloc_and_insert(OUT, arr2);
                 char *arr1 = "(";
                 OUT = str_alloc_and_insert(OUT, arr1);
@@ -429,6 +438,8 @@ void Final_File_text(void)
                  char *arr = ")";
                 OUT = str_alloc_and_insert(OUT, arr);
                 char *arr2 = "?";
+                 count ++ ;
+                    check_1 ++ ; 
                 OUT = str_alloc_and_insert(OUT, arr2);
                 char *arr1 = "(";
                 OUT = str_alloc_and_insert(OUT, arr1);
@@ -561,27 +572,41 @@ void Final_File_text(void)
         }
         else if (strcmp(p->data, "ALD") == 0)
         {   // Xem giải thich của "OLD"
-             char *arr = "*";
+            char *arr = "*";
+            char *arr_m = "(";
+              OUT = str_alloc_and_insert(arr_m,OUT);  // Mở ngoặc để chuẩn bị đóng cả cụm ALD này
             int size_of_arr = strlen(OUT);
 
             char *OUTtemp, *OUTtemp1;
             OUTtemp = (char *)calloc(size_of_arr, sizeof(char));
             strcpy(OUTtemp, OUT);
             char *token = strtok(OUTtemp, "?");
-            if (strlen(token)   != size_of_arr) // ko phát hiện dấu ?
+            if (strlen(token)   != size_of_arr) //phát hiện dấu ? suy ra đang OLD 2 nhánh thì thay dấu "?" bằng "+"
             {
-                     size_of_arr = strlen(token);
+             size_of_arr = strlen(token);
             OUTtemp1 = (char *)calloc(size_of_arr, sizeof(char));
             strcpy(OUTtemp1, token);
-            
             OUTtemp1 = str_alloc_and_insert(OUTtemp1, arr);
             token = strtok(NULL, " ");
             OUTtemp1 = str_alloc_and_insert(OUTtemp1, token);
             free(OUT);
             size_of_arr = strlen(OUTtemp1);
             OUT = (char *)calloc(size_of_arr, sizeof(char));
+            char *arr_d = ")";
+            OUT = str_alloc_and_insert(OUT, arr_d);  // Đóng ngoặc cụm ALD này
             strcpy(OUT, OUTtemp1);
             free(OUTtemp1);
+            p = p->next ;
+            if (strncmp(p->data, "(", 1) == 0)
+                {
+                                        char *arr = "?";
+                OUT = str_alloc_and_insert(OUT, arr);
+                char *arr1 = "(";
+                OUT = str_alloc_and_insert(OUT, arr1);
+                p = p->next;
+                continue;
+                }
+            continue;
             }
             else
             {
@@ -604,6 +629,8 @@ void Final_File_text(void)
                 OUT = (char *)calloc(size_of_arr, sizeof(char));
                 strcpy(OUT, OUTtemp1);
                 free(OUTtemp1);
+                 char *arr_d = ")";
+                OUT = str_alloc_and_insert(OUT, arr_d);  // Đóng ngoặc cụm ALD này
                  p = p->next ;
                 if (strncmp(p->data, "(", 1) == 0)
                 {
@@ -620,6 +647,8 @@ void Final_File_text(void)
         }
         else if (strcmp(p->data, "OLD") == 0)
         {   char *arr = "+";
+            char *arr_m = "(";
+            OUT = str_alloc_and_insert(arr_m,OUT);  // Mở ngoặc để chuẩn bị đóng cả cụm OLD này
             int size_of_arr = strlen(OUT);
 
             char *OUTtemp, *OUTtemp1;
@@ -640,6 +669,19 @@ void Final_File_text(void)
             OUT = (char *)calloc(size_of_arr, sizeof(char));
             strcpy(OUT, OUTtemp1);
             free(OUTtemp1);
+            char *arr_m = ")";
+            OUT = str_alloc_and_insert(OUT, arr_m);  // Đóng ngoặc để chuẩn bị đóng cả cụm OLD này
+            p = p->next;
+            if (strncmp(p->data, "(", 1) == 0) // Nếu phần tử tiếp theo là "(" thì thêm ?
+                {
+                                        char *arr = "?";
+                OUT = str_alloc_and_insert(OUT, arr);
+                char *arr1 = "(";
+                OUT = str_alloc_and_insert(OUT, arr1);
+                p = p->next;
+                continue;
+             }
+             continue;
             }
             else // ko phát hiện dấu ? nên đang OLD một nhánh với 1 cụm tính toán phía trước
             {   // ta phải xác định phần tử trước nhánh có nghĩa là nằm trưỡc dấu "(" ta đắt tên là A
@@ -662,7 +704,8 @@ void Final_File_text(void)
                 OUT = (char *)calloc(size_of_arr, sizeof(char)); // chuỗi mới đã thêm dấu +
                 strcpy(OUT, OUTtemp1);
                 free(OUTtemp1);
-
+                 char *arr_m = ")";
+                    OUT = str_alloc_and_insert(OUT, arr_m);  // Đóng ngoặc để chuẩn bị đóng cả cụm OLD này
                 p = p->next ;
                 if (strncmp(p->data, "(", 1) == 0) // Nếu phần tử tiếp theo là "(" thì thêm ?
                 {
