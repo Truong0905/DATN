@@ -9,12 +9,12 @@ int main(void)
     ListFinal();
     BranchWithFirst_F();
      Final_File_text();
-    p = First_F;
-    while (p != NULL)
-    {
-        printf("%s ", p->data);
-        p = p->next;
-    }
+    // p = First_F;
+    // while (p != NULL)
+    // {
+    //     printf("%s ", p->data);
+    //     p = p->next;
+    // }
     fclose(fptest);
     return 0;
 }
@@ -490,10 +490,6 @@ void Final_File_text(void)
         }
         else if (strcmp(p->data, "=") == 0) // q0.1=(A*B)\n
         {
-            char *arr1 = "(";
-            char *arr2 = ")";
-            OUT = str_alloc_and_insert(arr1, OUT);
-            OUT = str_alloc_and_insert(OUT, arr2);
             char *arr3 = ";\n";
             OUT = str_alloc_and_insert(OUT, arr3);
             OUT = str_alloc_and_insert(p->data, OUT);
