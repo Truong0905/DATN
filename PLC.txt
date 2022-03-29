@@ -1,0 +1,28 @@
+LD     I3.0
+A      I7.3
+LDN    I4.5
+A      I0.5
+OLD
+LD     I3.7
+NOT
+OLD
+A      I7.4
+=      Q0.0
+N
+LDN    I2.1
+A      I2.3
+LD     I2.4
+ON     I2.5
+ALD
+A      I3.4
+=      Q2.2
+N
+LD     I0.0
+O      I0.2
+O      I0.3
+=      M0.0
+N
+LD     M0.1
+A      I0.5
+=      Q0.0
+N
