@@ -8,13 +8,13 @@ int main(void)
     ConvFrList(fptest, row);
     ListFinal();
     BranchWithFirst_F();
-    Final_File_text();
-    // p = First_F;
-    // while (p != NULL)
-    // {
-    //     printf("%s ", p->data);
-    //     p = p->next;
-    // }
+          Final_File_text();
+    p = First_F;
+    while (p != NULL)
+    {
+        printf("%s ", p->data);
+        p = p->next;
+    }
     fclose(fptest);
     return 0;
 }
@@ -237,16 +237,17 @@ void ListFinal(void)
 void BranchWithFirst_F(void)
 {
     LinkList *p, *k, *r, *z; // p dungf duyệt danh sách , q là biến tạm thời lưu dữ liệu
-    int cout1 = 0;           // Đếm số "("
-    int cout2 = 0;           // Đếm số ")"
+    LinkList *pNEXT, *pNEXT1, *pPREV;
+    int cout1 = 0; // Đếm số "("
+    int cout2 = 0; // Đếm số ")"
     p = First_F;
     while (p != NULL)
     {
         if (p == First_F) // Thêm ký tự '(' vào đầu
         {
             k = (LinkList *)malloc(sizeof(LinkList));
-            k->data = (char *)calloc(1, sizeof(char));
-            k->data[0] = '(';
+            k->data = (char *)calloc(2, sizeof(char));
+            k->data = "(\0";
             cout1++;
             k->next = p;
             p->prev = k;
@@ -257,10 +258,24 @@ void BranchWithFirst_F(void)
         {
             if ((strcmp(p->data, "ALD") == 0) || (strcmp(p->data, "OLD") == 0) || (strcmp(p->data, "TON") == 0) || (strcmp(p->data, "CTU") == 0) || (strcmp(p->data, "CTD") == 0) || (strcmp(p->data, "CTUD") == 0))
             {
+                if ((strcmp(p->data, "ALD") == 0) || (strcmp(p->data, "OLD") == 0)) // not của 1 nhánh
+                {
+                    pNEXT = p->next;
+                    if (strcmp(pNEXT->data, "NOT") == 0)
+                    {
+                        k = (LinkList *)malloc(sizeof(LinkList));
+                        k->data = (char *)calloc(2, sizeof(char));
+                        k->data = "!\0";
+                        p->next = k;
+                        k->prev = p;
+                        k->next = pNEXT;
+                        pNEXT->prev = k;
+                    }
+                }
                 r = p->prev;
                 k = (LinkList *)malloc(sizeof(LinkList));
-                k->data = (char *)calloc(1, sizeof(char));
-                k->data[0] = ')';
+                k->data = (char *)calloc(2, sizeof(char));
+                k->data = ")\0";
                 cout2++;
                 r->next = k;
                 k->prev = r;
@@ -273,8 +288,8 @@ void BranchWithFirst_F(void)
                 {
                     r = p->prev;
                     k = (LinkList *)malloc(sizeof(LinkList));
-                    k->data = (char *)calloc(1, sizeof(char));
-                    k->data[0] = ')';
+                    k->data = (char *)calloc(2, sizeof(char));
+                    k->data = ")\0";
                     cout2++;
                     r->next = k;
                     k->prev = r;
@@ -289,8 +304,8 @@ void BranchWithFirst_F(void)
                 if ((strcmp(z->data, "=") == 0) || (strcmp(r->data, "N") == 0) || (strcmp(r->data, "ALD") == 0) || (strcmp(r->data, "OLD") == 0))
                 {
                     k = (LinkList *)malloc(sizeof(LinkList));
-                    k->data = (char *)calloc(1, sizeof(char));
-                    k->data[0] = '(';
+                    k->data = (char *)calloc(2, sizeof(char));
+                    k->data = "(\0";
                     cout1++;
                     r->next = k;
                     k->prev = r;
@@ -302,8 +317,8 @@ void BranchWithFirst_F(void)
                     if (cout1 == cout2)
                     {
                         k = (LinkList *)malloc(sizeof(LinkList));
-                        k->data = (char *)calloc(1, sizeof(char));
-                        k->data[0] = '(';
+                        k->data = (char *)calloc(2, sizeof(char));
+                        k->data = "(\0";
                         cout1++;
                         r->next = k;
                         k->prev = r;
@@ -313,8 +328,8 @@ void BranchWithFirst_F(void)
                     else
                     {
                         k = (LinkList *)malloc(sizeof(LinkList));
-                        k->data = (char *)calloc(1, sizeof(char));
-                        k->data[0] = ')';
+                        k->data = (char *)calloc(2, sizeof(char));
+                        k->data = ")\0";
                         cout1++;
                         r->next = k;
                         k->prev = r;
@@ -324,13 +339,47 @@ void BranchWithFirst_F(void)
                         r = p->prev;
                         z = r->prev;
                         k = (LinkList *)malloc(sizeof(LinkList));
-                        k->data = (char *)calloc(1, sizeof(char));
-                        k->data[0] = '(';
+                        k->data = (char *)calloc(2, sizeof(char));
+                        k->data = "(\0";
                         cout2++;
                         r->next = k;
                         k->prev = r;
                         k->next = p;
                         p->prev = k;
+                    }
+                }
+            }
+            else if ((strcmp(p->data, "A") == 0) || (strcmp(p->data, "O") == 0) || (strcmp(p->data, "AN") == 0) || (strcmp(p->data, "ON") == 0))
+            {
+                pNEXT = p->next;
+                pNEXT1 = pNEXT->next;
+                pPREV = p->prev;
+                if (strcmp(pNEXT1->data, "NOT") == 0) // NOT của 1 tập hợp các biến
+                {
+                    while (strncmp(pPREV->data, "(", 1) != 0)
+                    {
+                        pPREV = pPREV->prev;
+                    }
+                    if (pPREV != First_F)
+                    {
+                        r = pPREV->prev;
+                        k = (LinkList *)malloc(sizeof(LinkList));
+                        k->data = (char *)calloc(4, sizeof(char));
+                        k->data = "not\0";
+                        r->next = k;
+                        k->prev = r;
+                        k->next = pPREV;
+                        pPREV->prev = k;
+                    }
+                    else
+                    {
+                        k = (LinkList *)malloc(sizeof(LinkList));
+                        k->data = (char *)calloc(4, sizeof(char));
+                        k->data = "not\0";
+                        k->next = pPREV;
+                        pPREV->prev = k;
+                        k->prev = NULL;
+                        First_F = k;
                     }
                 }
             }
@@ -340,8 +389,8 @@ void BranchWithFirst_F(void)
                 if ((strcmp(r->data, "ALD") != 0) && (strcmp(r->data, "OLD") != 0) && (strcmp(r->data, "AENO") != 0))
                 {
                     k = (LinkList *)malloc(sizeof(LinkList));
-                    k->data = (char *)calloc(1, sizeof(char));
-                    k->data[0] = ')';
+                    k->data = (char *)calloc(2, sizeof(char));
+                    k->data = ")\0";
                     cout2++;
                     r->next = k;
                     k->prev = r;
@@ -425,26 +474,53 @@ void Final_File_text(void)
         {
 
             pNEXT = p->next;
-            if (strncmp(pNEXT->data, "(", 1) == 0) // Nếu sau đó sẽ có dấu "(" thì thêm "?" vào giữa 2 dấu
+            pNEXT1 = pNEXT->next;
+            if (strncmp(pNEXT->data, "not", 3) != 0)
             {
-                OUT = str_alloc_and_insert(OUT, insert_str_next);
-                OUT = str_alloc_and_insert(OUT, insert_str_H);
-                count++;
-                OUT = str_alloc_and_insert(OUT, insert_str_pre);
-                p = pNEXT->next;
-                continue;
+                if (strncmp(pNEXT->data, "(", 1) == 0) // Nếu sau đó sẽ có dấu "(" thì thêm "?" vào giữa 2 dấu
+                {
+                    OUT = str_alloc_and_insert(OUT, insert_str_next);
+                    OUT = str_alloc_and_insert(OUT, insert_str_H);
+                    count++;
+                    OUT = str_alloc_and_insert(OUT, insert_str_pre);
+                    p = pNEXT->next;
+                    continue;
+                }
+                else
+                {
+                    OUT = str_alloc_and_insert(OUT, insert_str_next);
+                }
             }
-            else
+            else  // dạng ...)not(LD ....)
             {
-                OUT = str_alloc_and_insert(OUT, insert_str_next);
+                    char *arr_temp = "!";
+                    OUT = str_alloc_and_insert(OUT, insert_str_next);
+                    OUT = str_alloc_and_insert(OUT, insert_str_H);
+                    OUT = str_alloc_and_insert(OUT, arr_temp);
+                    count++;
+                    OUT = str_alloc_and_insert(OUT, insert_str_pre);
+                    p = pNEXT->next;
+                    continue;
+                
+ 
             }
         }
         else if ((strcmp(p->data, "LD") == 0) || (strcmp(p->data, "LDN") == 0))
         {
             pPREV = p->prev;
             pPREV1 = pPREV->prev;
+            if (pPREV1 != NULL) // dảm bảo kể cả à đâu chương trình mà có not thì vẫn được xét thêm "!"
+            {
+                if (strncmp(pPREV1->data, "not", 3) == 0)
+                {
+                    char *temp_arr = "!";
+                    OUT = str_alloc_and_insert(temp_arr, OUT);
+                }
+            }
+
             pNEXT = p->next;
             pNEXT1 = pNEXT->next;
+
             if (strcmp(pNEXT1->data, "NOT") == 0)
             {
                 char *arr = "!";
@@ -482,11 +558,8 @@ void Final_File_text(void)
 
             if (strcmp(pNEXT1->data, "NOT") == 0)
             {
-                char *arr1 = "!(";
-                char *arr_temp = str_alloc_and_insert(arr1, pNEXT->data);
                 OUT = str_alloc_and_insert(OUT, insert_str_mul);
-                OUT = str_alloc_and_insert(OUT, arr_temp);
-                OUT = str_alloc_and_insert(OUT, insert_str_next);
+                OUT = str_alloc_and_insert(OUT, pNEXT->data);
                 p = pNEXT1->next;
             }
             else if (strcmp(pNEXT1->data, "NOT") != 0)
@@ -495,10 +568,10 @@ void Final_File_text(void)
                 OUT = str_alloc_and_insert(OUT, pNEXT->data);
                 p = pNEXT1;
             }
-                if ((strcmp(pPREV->data, "ALD") == 0) || (strcmp(pPREV->data, "OLD") == 0)) // nhánh nhân hoặc cộng với biến
-                {
-                    OUT = str_alloc_and_insert(OUT, insert_str_next);
-                }
+            if ((strcmp(pPREV->data, "ALD") == 0) || (strcmp(pPREV->data, "OLD") == 0)) // nhánh nhân hoặc cộng với biến
+            {
+                OUT = str_alloc_and_insert(OUT, insert_str_next);
+            }
 
             while ((strcmp(p->data, "A") == 0) || (strcmp(p->data, "AN") == 0))
             {
@@ -507,11 +580,8 @@ void Final_File_text(void)
                 pNEXT1 = pNEXT->next;
                 if (strcmp(pNEXT1->data, "NOT") == 0)
                 {
-                    char *arr1 = "!(";
-                    char *arr_temp = str_alloc_and_insert(arr1, pNEXT->data);
                     OUT = str_alloc_and_insert(OUT, insert_str_mul);
-                    OUT = str_alloc_and_insert(OUT, arr_temp);
-                    OUT = str_alloc_and_insert(OUT, insert_str_next);
+                    OUT = str_alloc_and_insert(OUT, pNEXT->data);
                     p = pNEXT1->next;
                     continue;
                 }
@@ -544,14 +614,10 @@ void Final_File_text(void)
                     pNEXT->data = str_alloc_and_insert(pNEXT->data, insert_str_next);
                 }
             }
-
             if (strcmp(pNEXT1->data, "NOT") == 0)
             {
-                char *arr1 = "!(";
-                char *arr_temp = str_alloc_and_insert(arr1, pNEXT->data);
                 OUT = str_alloc_and_insert(OUT, insert_str_add);
-                OUT = str_alloc_and_insert(OUT, arr_temp);
-                OUT = str_alloc_and_insert(OUT, insert_str_next);
+                OUT = str_alloc_and_insert(OUT, pNEXT->data);
                 p = pNEXT1->next;
             }
             else if (strcmp(pNEXT1->data, "NOT") != 0)
@@ -560,10 +626,10 @@ void Final_File_text(void)
                 OUT = str_alloc_and_insert(OUT, pNEXT->data);
                 p = pNEXT1;
             }
-             if ((strcmp(pPREV->data, "ALD") == 0) || (strcmp(pPREV->data, "OLD") == 0)) // nhánh nhân hoặc cộng với biến
-                {
-                    OUT = str_alloc_and_insert(OUT, insert_str_next);
-                }
+            if ((strcmp(pPREV->data, "ALD") == 0) || (strcmp(pPREV->data, "OLD") == 0)) // nhánh nhân hoặc cộng với biến
+            {
+                OUT = str_alloc_and_insert(OUT, insert_str_next);
+            }
 
             while ((strcmp(p->data, "O") == 0) || (strcmp(p->data, "ON") == 0))
             {
@@ -572,11 +638,9 @@ void Final_File_text(void)
                 pNEXT1 = pNEXT->next;
                 if (strcmp(pNEXT1->data, "NOT") == 0)
                 {
-                    char *arr1 = "!(";
-                    char *arr_temp = str_alloc_and_insert(arr1, pNEXT->data);
+
                     OUT = str_alloc_and_insert(OUT, insert_str_add);
-                    OUT = str_alloc_and_insert(OUT, arr_temp);
-                    OUT = str_alloc_and_insert(OUT, insert_str_next);
+                    OUT = str_alloc_and_insert(OUT, pNEXT->data);
                     p = pNEXT1->next;
                     continue;
                 }
@@ -596,8 +660,14 @@ void Final_File_text(void)
             continue;
         }
         else if (strcmp(p->data, "ALD") == 0)
-        {                                                    // Xem giải thich của "OLD"
+        {
             OUT = str_alloc_and_insert(insert_str_pre, OUT); // Mở ngoặc cả cụm ALD này
+            pNEXT = p->next;
+            if (strncmp(pNEXT->data, "!", 1) == 0)
+            {
+                char *arr_temp = "!";
+                OUT = str_alloc_and_insert(arr_temp, OUT);
+            }
             int size_of_arr = strlen(OUT);
 
             char *OUTtemp, *OUTtemp1;
@@ -632,7 +702,14 @@ void Final_File_text(void)
         }
         else if (strcmp(p->data, "OLD") == 0)
         {
+
             OUT = str_alloc_and_insert(insert_str_pre, OUT); // Mở ngoặc cả cụm OLD này
+            pNEXT = p->next;
+            if (strncmp(pNEXT->data, "!", 1) == 0)
+            {
+                char *arr_temp = "!";
+                OUT = str_alloc_and_insert(arr_temp, OUT);
+            }
             int size_of_arr = strlen(OUT);
 
             char *OUTtemp, *OUTtemp1;
@@ -664,13 +741,6 @@ void Final_File_text(void)
                 continue;
             }
             continue;
-        }
-        else if (strcmp(p->data, "NOT") == 0)
-        {
-            char *arr1 = "!(";
-            OUT = str_alloc_and_insert(arr1, OUT);
-            char *arr2 = ")";
-            OUT = str_alloc_and_insert(OUT, arr2);
         }
         else if (strcmp(p->data, "=") == 0) // q0.1=(A*B)\n
         {
