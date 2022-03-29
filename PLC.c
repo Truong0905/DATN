@@ -453,23 +453,10 @@ void Final_File_text(void)
                 OUT = str_alloc_and_insert(OUT, pNEXT->data);
                 OUT = str_alloc_and_insert(OUT, insert_str_next);
                 p = pNEXT1->next;
-                if (pPREV1 != NULL)
-                {
-                    if ((strcmp(pPREV1->data, "ALD") == 0) || (strcmp(pPREV1->data, "OLD") == 0)) // nhánh nhân hoặc cộng với biến
-                    {
-                        OUT = str_alloc_and_insert(OUT, insert_str_next);
-                    }
-                }
+
                 continue;
             }
             OUT = str_alloc_and_insert(OUT, pNEXT->data);
-            if (pPREV1 != NULL)
-            {
-                if ((strcmp(pPREV1->data, "ALD") == 0) || (strcmp(pPREV1->data, "OLD") == 0)) // nhánh nhân hoặc cộng với biến
-                {
-                    OUT = str_alloc_and_insert(OUT, insert_str_next);
-                }
-            }
             p = pNEXT1;
             continue;
         }
@@ -508,6 +495,10 @@ void Final_File_text(void)
                 OUT = str_alloc_and_insert(OUT, pNEXT->data);
                 p = pNEXT1;
             }
+                if ((strcmp(pPREV->data, "ALD") == 0) || (strcmp(pPREV->data, "OLD") == 0)) // nhánh nhân hoặc cộng với biến
+                {
+                    OUT = str_alloc_and_insert(OUT, insert_str_next);
+                }
 
             while ((strcmp(p->data, "A") == 0) || (strcmp(p->data, "AN") == 0))
             {
@@ -569,6 +560,10 @@ void Final_File_text(void)
                 OUT = str_alloc_and_insert(OUT, pNEXT->data);
                 p = pNEXT1;
             }
+             if ((strcmp(pPREV->data, "ALD") == 0) || (strcmp(pPREV->data, "OLD") == 0)) // nhánh nhân hoặc cộng với biến
+                {
+                    OUT = str_alloc_and_insert(OUT, insert_str_next);
+                }
 
             while ((strcmp(p->data, "O") == 0) || (strcmp(p->data, "ON") == 0))
             {
