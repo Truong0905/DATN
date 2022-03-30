@@ -731,7 +731,7 @@ void Final_File_text(void)
         }
         else if (strcmp(p->data, "ALD") == 0)
         {
-            if (count > 1)
+             if (count > 1)
             {
                 char *OUTtemp_H1 = "";
                 char *token = strtok(OUT, "?"); /// (...)?((.....)?(......))
@@ -785,7 +785,7 @@ void Final_File_text(void)
             }
             pNEXT = p->next;
 
-            if ((check_H == 1) && (((strncmp(p->data, "OLD", 1) == 0) && ((strncmp(p->data, "ALD", 1) == 0)) || ((strncmp(pNEXT->data, "OLD", 1) == 0) && (strncmp(pNEXT->data, "ALD", 1) == 0)))))
+           if ((check_H == 1) && (((strncmp(p->data, "OLD", 1) == 0) || (strncmp(p->data, "ALD", 1) == 0)) || ((strncmp(pNEXT->data, "OLD", 1) == 0) || (strncmp(pNEXT->data, "ALD", 1) == 0))))
             {
                 OUT = str_alloc_and_insert(OUTtemp_H, OUT);
                 check_H = 0;
@@ -853,7 +853,7 @@ void Final_File_text(void)
             }
             pNEXT = p->next;
 
-            if ((check_H == 1) && (((strncmp(p->data, "OLD", 1) == 0) && (strncmp(p->data, "ALD", 1) == 0)) || ((strncmp(pNEXT->data, "OLD", 1) == 0) && (strncmp(pNEXT->data, "ALD", 1) == 0))))
+            if ((check_H == 1) && (((strncmp(p->data, "OLD", 1) == 0) || (strncmp(p->data, "ALD", 1) == 0)) || ((strncmp(pNEXT->data, "OLD", 1) == 0) || (strncmp(pNEXT->data, "ALD", 1) == 0))))
             {
                 OUT = str_alloc_and_insert(OUTtemp_H, OUT);
                 check_H = 0;
