@@ -356,7 +356,7 @@ void BranchWithFirst_F(void)
             }
             else if ((strcmp(p->data, "A") == 0) || (strcmp(p->data, "O") == 0) || (strcmp(p->data, "AN") == 0) || (strcmp(p->data, "ON") == 0))
             {
-                pNEXT = p->next;
+                 pNEXT = p->next;
                 pNEXT1 = pNEXT->next;
                 pPREV = p->prev;
                 if (strcmp(pNEXT1->data, "NOT") == 0) // NOT của 1 tập hợp các biến
@@ -439,11 +439,11 @@ void Final_File_text(void)
     int check = 0; // Kiểm tra xem hết 1 network chưa
     int check_H = 0;
     char *OUTtemp_H = " "; // Kiểm tra xem có nhánh lớn trước đó không
-    int count = 0;        // Đếm số dấu "?"
+    int count = 0;         // Đếm số dấu "?"
     pFile = fopen("PLC_F.txt", "w");
     p = First_F;
     while (p != NULL)
-    {   
+    {
 
         // if (count > 1)
         // {
@@ -498,8 +498,7 @@ void Final_File_text(void)
         }
         else if (strncmp(p->data, ")", 1) == 0)
         {
-
-            pNEXT = p->next;
+             pNEXT = p->next;
             pNEXT1 = pNEXT->next;
             if ((strncmp(pNEXT->data, "not", 3) != 0) && (strncmp(pNEXT->data, "1no", 3) != 0))
             {
@@ -536,24 +535,37 @@ void Final_File_text(void)
                 p = pNEXT1->next;
                 continue;
             }
+
+         
         }
         else if ((strcmp(p->data, "LD") == 0) || (strcmp(p->data, "LDN") == 0))
         {
             pPREV = p->prev;
             pPREV1 = pPREV->prev;
+            pNEXT = p->next;
+            pNEXT1 = pNEXT->next;
             if (pPREV1 != NULL) // dảm bảo kể cả à đâu chương trình mà có not thì vẫn được xét thêm "!"
             {
-                if (strncmp(pPREV1->data, "not", 3) == 0)
+                if  ( (strncmp(pPREV1->data, "not", 3) == 0)    || (strncmp(pPREV1->data, "1no", 3) == 0) )
                 {
-                    char *temp_arr = "!";
-                    OUT = str_alloc_and_insert(temp_arr, OUT);
+                    if (strcmp(pNEXT1->data, "NOT") == 0) // not cho 1 biến đầu nhánh
+                    {
+                        char *temp_arr = "!";
+                        OUT = str_alloc_and_insert(temp_arr, OUT);
+                    }
+                    else    // not tai 1 diem bat ky tren cung 1 nhanh
+                    {
+                        char *arr = "!";
+                         OUT = str_alloc_and_insert(OUT, arr);
+                        OUT = str_alloc_and_insert(OUT, insert_str_pre);
+                        OUT = str_alloc_and_insert(OUT, pNEXT->data);
+                        p = pNEXT1;
+                        continue;
+                    }
                 }
             }
 
-            pNEXT = p->next;
-            pNEXT1 = pNEXT->next;
-
-            if (strcmp(pNEXT1->data, "NOT") == 0)
+            if (strcmp(pNEXT1->data, "NOT") == 0) // not cho 1 biến duy nhất
             {
                 char *arr = "!";
                 OUT = str_alloc_and_insert(OUT, arr);
@@ -589,9 +601,11 @@ void Final_File_text(void)
             }
 
             if (strcmp(pNEXT1->data, "NOT") == 0)
-            {
+            {   
+               
                 OUT = str_alloc_and_insert(OUT, insert_str_mul);
                 OUT = str_alloc_and_insert(OUT, pNEXT->data);
+                 OUT = str_alloc_and_insert(OUT, insert_str_next);
                 p = pNEXT1->next;
             }
             else if (strcmp(pNEXT1->data, "NOT") != 0)
@@ -606,9 +620,11 @@ void Final_File_text(void)
                 pNEXT = p->next;
                 pNEXT1 = pNEXT->next;
                 if (strcmp(pNEXT1->data, "NOT") == 0)
-                {
+                {   
+                   
                     OUT = str_alloc_and_insert(OUT, insert_str_mul);
                     OUT = str_alloc_and_insert(OUT, pNEXT->data);
+                     OUT = str_alloc_and_insert(OUT, insert_str_next);
                     p = pNEXT1->next;
                     continue;
                 }
@@ -634,19 +650,19 @@ void Final_File_text(void)
                 p = p->next;
             }
 
-            if (  (strncmp(p->data, ")",1) == 0) && ((strcmp(pPREV_temp->data, "ALD") == 0) || (strcmp(pPREV_temp->data, "OLD") == 0))  )
+            if ((strncmp(p->data, ")", 1) == 0) && ((strcmp(pPREV_temp->data, "ALD") == 0) || (strcmp(pPREV_temp->data, "OLD") == 0)))
             {
-                p = p->next ;
+                p = p->next;
             }
 
             if (((strcmp(p->data, "ALD") == 0) || (strcmp(p->data, "OLD") == 0)) && check_H == 1)
             {
                 OUT = str_alloc_and_insert(OUTtemp_H, OUT);
                 check_H = 0;
-                count ++ ;
-                 free (OUTtemp_H);
-                OUTtemp_H = (char *)calloc(2,sizeof(char));
-                OUTtemp_H=" ";
+                count++;
+                free(OUTtemp_H);
+                OUTtemp_H = (char *)calloc(2, sizeof(char));
+                OUTtemp_H = " ";
             }
 
             continue;
@@ -670,6 +686,7 @@ void Final_File_text(void)
             {
                 OUT = str_alloc_and_insert(OUT, insert_str_add);
                 OUT = str_alloc_and_insert(OUT, pNEXT->data);
+                OUT = str_alloc_and_insert(OUT, insert_str_next);
                 p = pNEXT1->next;
             }
             else if (strcmp(pNEXT1->data, "NOT") != 0)
@@ -687,6 +704,7 @@ void Final_File_text(void)
                 {
                     OUT = str_alloc_and_insert(OUT, insert_str_add);
                     OUT = str_alloc_and_insert(OUT, pNEXT->data);
+                    OUT = str_alloc_and_insert(OUT, insert_str_next);
                     p = pNEXT1->next;
                     continue;
                 }
@@ -711,27 +729,26 @@ void Final_File_text(void)
                 OUT = str_alloc_and_insert(OUT, insert_str_pre);
                 p = p->next;
             }
-            if (  (strncmp(p->data, ")",1) == 0) && ((strcmp(pPREV_temp->data, "ALD") == 0) || (strcmp(pPREV_temp->data, "OLD") == 0))  )
+            if ((strncmp(p->data, ")", 1) == 0) && ((strcmp(pPREV_temp->data, "ALD") == 0) || (strcmp(pPREV_temp->data, "OLD") == 0)))
             {
-                p = p->next ;
+                p = p->next;
             }
 
             if (((strcmp(p->data, "ALD") == 0) || (strcmp(p->data, "OLD") == 0)) && check_H == 1)
             {
                 OUT = str_alloc_and_insert(OUTtemp_H, OUT);
-                check_H = 0 ;
-                count ++ ;
-                   free (OUTtemp_H);
-                OUTtemp_H = (char *)calloc(2,sizeof(char));
-                OUTtemp_H=" ";
+                check_H = 0;
+                count++;
+                free(OUTtemp_H);
+                OUTtemp_H = (char *)calloc(2, sizeof(char));
+                OUTtemp_H = " ";
             }
 
-            
             continue;
         }
         else if (strcmp(p->data, "ALD") == 0)
         {
-             if (count > 1)
+            if (count > 1)
             {
                 char *OUTtemp_H1 = "";
                 char *token = strtok(OUT, "?"); /// (...)?((.....)?(......))
@@ -785,14 +802,14 @@ void Final_File_text(void)
             }
             pNEXT = p->next;
 
-           if ((check_H == 1) && (((strncmp(p->data, "OLD", 1) == 0) || (strncmp(p->data, "ALD", 1) == 0)) || ((strncmp(pNEXT->data, "OLD", 1) == 0) || (strncmp(pNEXT->data, "ALD", 1) == 0))))
+            if ((check_H == 1) && (((strncmp(p->data, "OLD", 1) == 0) || (strncmp(p->data, "ALD", 1) == 0)) || ((strncmp(pNEXT->data, "OLD", 1) == 0) || (strncmp(pNEXT->data, "ALD", 1) == 0))))
             {
                 OUT = str_alloc_and_insert(OUTtemp_H, OUT);
                 check_H = 0;
                 count++;
-                   free (OUTtemp_H);
-                OUTtemp_H = (char *)calloc(2,sizeof(char));
-                OUTtemp_H=" ";
+                free(OUTtemp_H);
+                OUTtemp_H = (char *)calloc(2, sizeof(char));
+                OUTtemp_H = " ";
             }
             continue;
         }
@@ -858,9 +875,9 @@ void Final_File_text(void)
                 OUT = str_alloc_and_insert(OUTtemp_H, OUT);
                 check_H = 0;
                 count++;
-                   free (OUTtemp_H);
-                OUTtemp_H = (char *)calloc(2,sizeof(char));
-                OUTtemp_H=" ";
+                free(OUTtemp_H);
+                OUTtemp_H = (char *)calloc(2, sizeof(char));
+                OUTtemp_H = " ";
             }
             continue;
         }
