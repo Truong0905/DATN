@@ -736,11 +736,11 @@ void Final_File_text(void)
                 OUT = str_alloc_and_insert(OUT, insert_str_next);
             }
 
-
             if ((strncmp(p->data, ")", 1) == 0) && ((strcmp(pPREV_temp->data, "ALD") == 0) || (strcmp(pPREV_temp->data, "OLD") == 0)))
             {
                 p = p->next;
             }
+
 
             if (((strcmp(p->data, "ALD") == 0) || (strcmp(p->data, "OLD") == 0)) && check_H == 1)
             {
