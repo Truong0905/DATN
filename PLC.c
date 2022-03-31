@@ -14,7 +14,7 @@ int main(void)
         printf("%s ", p->data);
         p = p->next;
     }
-       Final_File_text();
+    Final_File_text();
 
     fclose(fptest);
     return 0;
@@ -404,7 +404,7 @@ void BranchWithFirst_F(void)
                         else
                         {
                             char *arr_NEXT1 = "T_";
-                            pNEXT1->data = str_alloc_and_insert(arr_NEXT1,pNEXT1->data);
+                            pNEXT1->data = str_alloc_and_insert(arr_NEXT1, pNEXT1->data);
                         }
                     }
                     else
@@ -444,7 +444,6 @@ void Final_File_text(void)
     LinkList *p, *pNEXT, *pNEXT1, *pPREV, *pPREV1;
     FILE *pFile;
     char *OUT;
-    char *OUT_pre = "";
     char *insert_str_pre = "(";
     char *insert_str_next = ")";
     char *insert_str_mul = "*";
@@ -459,21 +458,6 @@ void Final_File_text(void)
     while (p != NULL)
     {
 
-        // if (count > 1)
-        // {
-        //     char *OUTtemp = "";
-        //     char *token = strtok(OUT, "?"); /// (...)@((.....)?(......))
-        //     int a = strlen(token);
-        //     char *arr = "@";
-        //     char *arr1 = str_alloc_and_insert(token, arr);
-        //     OUT_pre = str_alloc_and_insert(OUT_pre, arr1); // (....)@
-        //     token = strtok(NULL, " ");
-        //     OUTtemp = str_alloc_and_insert(OUTtemp, token);
-        //     free(OUT);
-        //     OUT = (char *)calloc(strlen(OUTtemp), sizeof(char));
-        //     strcpy(OUT, OUTtemp);
-        //     count = 1;
-        // }
         if (check == 0) // Chưa kết thúc 1 network
         {
             OUT = "";
@@ -667,6 +651,11 @@ void Final_File_text(void)
                 p = p->next;
             }
 
+             if (   (  (strcmp(p->data, "O") == 0)  || (strcmp(p->data, "ON") == 0)  )  &&   ((strcmp(pPREV_temp->data, "ALD") == 0) || (strcmp(pPREV_temp->data, "OLD") == 0))   )
+            {
+                OUT = str_alloc_and_insert(OUT, insert_str_next);
+            }
+
             if (((strcmp(p->data, "ALD") == 0) || (strcmp(p->data, "OLD") == 0)) && check_H == 1)
             {
                 OUT = str_alloc_and_insert(OUTtemp_H, OUT);
@@ -741,6 +730,13 @@ void Final_File_text(void)
                 OUT = str_alloc_and_insert(OUT, insert_str_pre);
                 p = p->next;
             }
+
+            if (   (  (strcmp(p->data, "A") == 0)  || (strcmp(p->data, "AN") == 0)  )  &&   ((strcmp(pPREV_temp->data, "ALD") == 0) || (strcmp(pPREV_temp->data, "OLD") == 0))   )
+            {
+                OUT = str_alloc_and_insert(OUT, insert_str_next);
+            }
+
+
             if ((strncmp(p->data, ")", 1) == 0) && ((strcmp(pPREV_temp->data, "ALD") == 0) || (strcmp(pPREV_temp->data, "OLD") == 0)))
             {
                 p = p->next;
@@ -896,9 +892,9 @@ void Final_File_text(void)
         else if (strcmp(p->data, "T_NOT") == 0)
         {
             char *arr_temp = "!";
-            OUT = str_alloc_and_insert(insert_str_pre,OUT);
-            OUT = str_alloc_and_insert(arr_temp,OUT);
-            OUT = str_alloc_and_insert(OUT,insert_str_next);
+            OUT = str_alloc_and_insert(insert_str_pre, OUT);
+            OUT = str_alloc_and_insert(arr_temp, OUT);
+            OUT = str_alloc_and_insert(OUT, insert_str_next);
         }
         else if (strcmp(p->data, "=") == 0) // q0.1=(A*B)\n
         {
@@ -955,9 +951,7 @@ void Final_File_text(void)
             char *arr3 = "\n";
             OUT = str_alloc_and_insert(OUT, arr3); // OUT : = (a*b)\n
         }
-
         p = p->next;
     }
-
     fclose(pFile);
 }
