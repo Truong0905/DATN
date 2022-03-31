@@ -14,9 +14,10 @@ int main(void)
         printf("%s ", p->data);
         p = p->next;
     }
+     fclose(fptest);
     Final_File_text();
 
-    fclose(fptest);
+   
     return 0;
 }
 FILE *ConvFrTxtFile(int *Row_Of_File)
@@ -466,7 +467,6 @@ void Final_File_text(void)
         }
         if (strcmp(p->data, "N") == 0)
         {
-            fputs(OUT, pFile);
             check = 0;
             char *OUTtemp_H = ""; // Kiểm tra xem có nhánh lớn trước đó không
             p = p->next;
@@ -748,6 +748,7 @@ void Final_File_text(void)
                          if (left > right)
                          {
                               OUT = str_alloc_and_insert(OUT, insert_str_next);
+                              continue; 
                          }
                          OUT = str_alloc_and_insert(OUT, insert_str_next);
                          OUT = str_alloc_and_insert(insert_str_pre,OUT);
@@ -925,6 +926,7 @@ void Final_File_text(void)
             OUT = str_alloc_and_insert(p->data, OUT);
             p = p->next;
             OUT = str_alloc_and_insert(p->data, OUT);
+             fputs(OUT, pFile);
         }
         else if (strcmp(p->data, "CTU") == 0)
         {
