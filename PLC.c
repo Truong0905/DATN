@@ -650,8 +650,8 @@ void Final_File_text(void)
             {
                 p = p->next;
             }
-
-             if (   (  (strcmp(p->data, "O") == 0)  || (strcmp(p->data, "ON") == 0)  )  &&   ((strcmp(pPREV_temp->data, "ALD") != 0) || (strcmp(pPREV_temp->data, "OLD") != 0))   )
+                pNEXT = p->next ;
+             if (   (  (strcmp(pNEXT->data, "O") == 0)  || (strcmp(pNEXT->data, "ON") == 0)  )  &&   ((strcmp(pPREV_temp->data, "ALD") != 0) && (strcmp(pPREV_temp->data, "OLD") != 0))   )
             {
                 OUT = str_alloc_and_insert(OUT, insert_str_next);
             }
@@ -730,8 +730,8 @@ void Final_File_text(void)
                 OUT = str_alloc_and_insert(OUT, insert_str_pre);
                 p = p->next;
             }
-
-            if (   (  (strcmp(p->data, "A") == 0)  || (strcmp(p->data, "AN") == 0)  )  &&   ((strcmp(pPREV_temp->data, "ALD") == 0) || (strcmp(pPREV_temp->data, "OLD") == 0))   )
+             pNEXT = p->next ;
+            if (   (  (strcmp(pNEXT->data, "A") == 0)  || (strcmp(pNEXT->data, "AN") == 0)  )  &&   ((strcmp(pPREV_temp->data, "ALD") != 0) && (strcmp(pPREV_temp->data, "OLD") != 0))   )
             {
                 OUT = str_alloc_and_insert(OUT, insert_str_next);
             }
