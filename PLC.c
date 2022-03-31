@@ -35,11 +35,17 @@ FILE *ConvFrTxtFile(int *Row_Of_File)
         printf("Can not open file");
         return NULL;
     }
-
+    int a = 0 ; // Kiểm tra xem đã vào chương trình chưa
     //Đọc từng dòng từ file cho tới khi gặp NULL
     while (fgets(arr, 128, fp) != NULL)
     {
         count = count + 1;
+                if (a== 0 && (strncmp(arr, "LD",2) == 0))
+        {
+            check = 1;
+            redu = count;
+            a = 1 ; 
+        }
 
         if (check == 1)
         {
@@ -57,11 +63,6 @@ FILE *ConvFrTxtFile(int *Row_Of_File)
             {
                 fputs(arr, fp1);
             }
-        }
-        if (strncmp(arr, "Network 1", 9) == 0)
-        {
-            check = 1;
-            redu = count;
         }
     }
     *Row_Of_File = count - redu;
@@ -588,7 +589,7 @@ void Final_File_text(void)
             pNEXT = p->next;
             pNEXT1 = pNEXT->next;
             LinkList *pPREV_temp = pPREV;
-            if ((strcmp(pPREV->data, "ALD") == 0) || (strcmp(pPREV->data, "OLD") == 0) || (strcmp(pPREV1->data, "A") == 0) || (strcmp(pPREV1->data, "O") == 0))
+            if ((strcmp(pPREV->data, "ALD") == 0) || (strcmp(pPREV->data, "OLD") == 0) || (strcmp(pPREV1->data, "A") == 0) || (strcmp(pPREV1->data, "O") == 0)  || (strcmp(pPREV1->data, "AN") == 0) || (strcmp(pPREV1->data, "ON") == 0))
             {
                 if (strcmp(pNEXT1->data, "NOT") != 0)
                 {
@@ -650,17 +651,6 @@ void Final_File_text(void)
             {
                 p = p->next;
             }
-            if (   (  (strcmp(p->data, "O") == 0)  || (strcmp(p->data, "ON") == 0)  )  &&   ((strcmp(pPREV_temp->data, "ALD") != 0) && (strcmp(pPREV_temp->data, "OLD") != 0))   )
-            {
-                   OUT = str_alloc_and_insert(OUT, insert_str_next);
-                OUT = str_alloc_and_insert(OUT,insert_str_mul) ;
-                 OUT = str_alloc_and_insert(OUT, insert_str_pre);
-                 p = p ->next ;
-                 OUT = str_alloc_and_insert(OUT,p->data) ;
-                 p = p ->next ;
-
-            }
-
             if (((strcmp(p->data, "ALD") == 0) || (strcmp(p->data, "OLD") == 0)) && check_H == 1)
             {
                 OUT = str_alloc_and_insert(OUTtemp_H, OUT);
@@ -680,7 +670,7 @@ void Final_File_text(void)
             pNEXT = p->next;
             pNEXT1 = pNEXT->next;
             LinkList *pPREV_temp = pPREV;
-            if ((strcmp(pPREV->data, "ALD") == 0) || (strcmp(pPREV->data, "OLD") == 0) || (strcmp(pPREV1->data, "A") == 0) || (strcmp(pPREV1->data, "O") == 0))
+            if ((strcmp(pPREV->data, "ALD") == 0) || (strcmp(pPREV->data, "OLD") == 0) || (strcmp(pPREV1->data, "A") == 0) || (strcmp(pPREV1->data, "O") == 0) || (strcmp(pPREV1->data, "ON") == 0) || (strcmp(pPREV1->data, "AN") == 0) )
             {
                 if (strcmp(pNEXT1->data, "NOT") != 0)
                 {
@@ -738,11 +728,30 @@ void Final_File_text(void)
             if (   (  (strcmp(p->data, "A") == 0)  || (strcmp(p->data, "AN") == 0)  )  &&   ((strcmp(pPREV_temp->data, "ALD") != 0) && (strcmp(pPREV_temp->data, "OLD") != 0))   )
             {
                 OUT = str_alloc_and_insert(OUT, insert_str_next);
-                OUT = str_alloc_and_insert(OUT,insert_str_mul) ;
-                 OUT = str_alloc_and_insert(OUT, insert_str_pre);
-                 p = p ->next ;
-                 OUT = str_alloc_and_insert(OUT,p->data) ;
-                 p = p ->next ;
+                   if (  (strcmp(pPREV1->data, "A") == 0)  || (strcmp(pPREV1->data, "AN") == 0)  )
+                    {
+                        
+                         int size_OUT = strlen(OUT);
+                         int left = 0 ;
+                         int right = 0 ;
+                         for (int i = 0 ; i<size_OUT ; i++)
+                         {
+                             if (OUT[i]=='(')
+                             {
+                                 left ++ ;
+                             }
+                             if (OUT[i]==')')
+                             {
+                                 right ++ ;
+                             }
+                         }
+                         if (left > right)
+                         {
+                              OUT = str_alloc_and_insert(OUT, insert_str_next);
+                         }
+                         OUT = str_alloc_and_insert(OUT, insert_str_next);
+                         OUT = str_alloc_and_insert(insert_str_pre,OUT);
+                    }
             }
 
 
