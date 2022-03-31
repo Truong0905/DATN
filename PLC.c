@@ -14,10 +14,9 @@ int main(void)
         printf("%s ", p->data);
         p = p->next;
     }
-     fclose(fptest);
     Final_File_text();
 
-   
+    fclose(fptest);
     return 0;
 }
 FILE *ConvFrTxtFile(int *Row_Of_File)
@@ -453,7 +452,7 @@ void Final_File_text(void)
     char *insert_str_H = "?";
     int check = 0; // Kiểm tra xem hết 1 network chưa
     int check_H = 0;
-    char *OUTtemp_H = " "; // Kiểm tra xem có nhánh lớn trước đó không
+    char *OUTtemp_H = ""; // Kiểm tra xem có nhánh lớn trước đó không
     int count = 0;         // Đếm số dấu "?"
     pFile = fopen("PLC_F.txt", "w");
     p = First_F;
@@ -591,7 +590,21 @@ void Final_File_text(void)
             LinkList *pPREV_temp = pPREV;
             if ((strcmp(pPREV->data, "ALD") == 0) || (strcmp(pPREV->data, "OLD") == 0) || (strcmp(pPREV1->data, "A") == 0) || (strcmp(pPREV1->data, "O") == 0)  || (strcmp(pPREV1->data, "AN") == 0) || (strcmp(pPREV1->data, "ON") == 0))
             {
-                if (strcmp(pNEXT1->data, "NOT") != 0)
+                                          int size_OUT = strlen(OUT);
+                int left = 0;
+                int right = 0;
+                for (int i = 0; i < size_OUT; i++)
+                {
+                    if (OUT[i] == '(')
+                    {
+                        left++;
+                    }
+                    if (OUT[i] == ')')
+                    {
+                        right++;
+                    }
+                }
+                if (  (strcmp(pNEXT1->data, "NOT") != 0) && (left < right)  )
                 {
                     pNEXT->data = str_alloc_and_insert(insert_str_pre, pNEXT->data);
                 }
@@ -657,8 +670,8 @@ void Final_File_text(void)
                 check_H = 0;
                 count++;
                 free(OUTtemp_H);
-                OUTtemp_H = (char *)calloc(2, sizeof(char));
-                OUTtemp_H = " ";
+                OUTtemp_H = (char *)calloc(1, sizeof(char));
+                OUTtemp_H = "";
             }
 
             continue;
@@ -730,26 +743,7 @@ void Final_File_text(void)
                 OUT = str_alloc_and_insert(OUT, insert_str_next);
                    if (  (strcmp(pPREV1->data, "A") == 0)  || (strcmp(pPREV1->data, "AN") == 0)  )
                     {
-                        
-                         int size_OUT = strlen(OUT);
-                         int left = 0 ;
-                         int right = 0 ;
-                         for (int i = 0 ; i<size_OUT ; i++)
-                         {
-                             if (OUT[i]=='(')
-                             {
-                                 left ++ ;
-                             }
-                             if (OUT[i]==')')
-                             {
-                                 right ++ ;
-                             }
-                         }
-                         if (left > right)
-                         {
                               OUT = str_alloc_and_insert(OUT, insert_str_next);
-                              continue; 
-                         }
                          OUT = str_alloc_and_insert(OUT, insert_str_next);
                          OUT = str_alloc_and_insert(insert_str_pre,OUT);
                     }
@@ -768,7 +762,7 @@ void Final_File_text(void)
                 count++;
                 free(OUTtemp_H);
                 OUTtemp_H = (char *)calloc(2, sizeof(char));
-                OUTtemp_H = " ";
+                OUTtemp_H = "";
             }
 
             continue;
@@ -836,7 +830,7 @@ void Final_File_text(void)
                 count++;
                 free(OUTtemp_H);
                 OUTtemp_H = (char *)calloc(2, sizeof(char));
-                OUTtemp_H = " ";
+                OUTtemp_H = "";
             }
             continue;
         }
@@ -916,7 +910,29 @@ void Final_File_text(void)
             OUT = str_alloc_and_insert(OUT, insert_str_next);
         }
         else if (strcmp(p->data, "=") == 0) // q0.1=(A*B)\n
-        {
+        {   
+                                      int size_OUT = strlen(OUT);
+                int left = 0;
+                int right = 0;
+                for (int i = 0; i < size_OUT; i++)
+                {
+                    if (OUT[i] == '(')
+                    {
+                        left++;
+                    }
+                    if (OUT[i] == ')')
+                    {
+                        right++;
+                    }
+                }
+                if (left > right)
+                {
+                    OUT = str_alloc_and_insert(OUT, insert_str_next) ;
+                }
+                else if (left < right)
+                {
+                    OUT = str_alloc_and_insert(insert_str_pre, OUT) ;
+                }
             char *arr1 = "(";
             char *arr2 = ")";
             OUT = str_alloc_and_insert(arr1, OUT);
@@ -926,7 +942,7 @@ void Final_File_text(void)
             OUT = str_alloc_and_insert(p->data, OUT);
             p = p->next;
             OUT = str_alloc_and_insert(p->data, OUT);
-             fputs(OUT, pFile);
+                        fputs(OUT, pFile);
         }
         else if (strcmp(p->data, "CTU") == 0)
         {
