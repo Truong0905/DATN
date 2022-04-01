@@ -521,7 +521,7 @@ void Final_File_text(void)
                     }
                     else
                     {
-                        OUT = str_alloc_and_insert(OUT, insert_str_next);
+                        OUT = str_alloc_and_insert(OUT, insert_str_pre);
                     }
                 }
                 else if ((strncmp(pPREV->data, "1not", 3) == 0) || (strncmp(pPREV->data, "not", 3) == 0))
@@ -563,7 +563,7 @@ void Final_File_text(void)
             }
             else
             {
-                OUT = str_alloc_and_insert(OUT, insert_str_next);
+                OUT = str_alloc_and_insert(OUT, insert_str_pre);
             }
             
                           
