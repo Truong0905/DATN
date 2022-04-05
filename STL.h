@@ -89,5 +89,37 @@ char* str_alloc_and_insert_every(const char* str1, size_t pos, const char* str2)
     return result;
 }
 
+void CountParentheses (char *arr   )  // Kiểm tra xem Dấu ( = ) nếu ko bằng thì chèn thêm ;
+{   
+        char *insert_str_pre = "(";
+    char *insert_str_next = ")";
+    int size_arr = strlen(arr);
+            int left = 0;
+            int right = 0;
+            for (int i = 0; i < size_arr; i++)
+            {
+                if (arr[i] == '(')
+                {
+                    left++;
+                }
+                if (arr[i] == ')')
+                {
+                    right++;
+                }
+            }
+            while (left != right)
+            {
+                        if (left > right)
+            {
+                arr = str_alloc_and_insert(arr, insert_str_next);
+                right ++ ;
+            }
+            else if (left < right)
+            {
+                arr = str_alloc_and_insert(insert_str_pre, arr);
+                left ++ ;
+            }
+            }
+}
 
 #endif
