@@ -500,12 +500,7 @@ void Final_File_text(void)
 
         if (strncmp(p->data, "(", 1) == 0)
         {
-                
-            
-                char *arr_temp = "!";
                 pPREV = p->prev;
-
-               
             if (pPREV != NULL ) 
             {    pPREV1 = pPREV->prev;
                   if ((strncmp(pPREV->data, "not", 3) != 0) && (strncmp(pPREV->data, "1no", 3) != 0))  
@@ -529,7 +524,6 @@ void Final_File_text(void)
                    
                     if (pPREV1 == NULL)  // Đầu chương trình
                     {    
-                           OUT = str_alloc_and_insert(OUT, arr_temp);
                          OUT = str_alloc_and_insert(OUT, insert_str_pre);
                         p = p->next;
                         continue;
@@ -556,7 +550,6 @@ void Final_File_text(void)
                         OUT = str_alloc_and_insert(OUT, insert_str_H);
                         count++;
                     }
-                     OUT = str_alloc_and_insert(OUT, arr_temp);
                     OUT = str_alloc_and_insert(OUT, insert_str_pre);
                     p = p->next;
                     continue;
@@ -606,7 +599,7 @@ void Final_File_text(void)
                 while ((strncmp(pNEXT1->data, "1no", 3) == 0) || (strncmp(pNEXT1->data, "not", 3) == 0))
                 {
 
-                    pNEXT1 = pNEXT1->next;
+                    pNEXT1 = pNEXT1->next; // Bỏ qua các phần tử 1not và not 
                 }
 
                 p = pNEXT1;
@@ -624,6 +617,7 @@ void Final_File_text(void)
                 if ((strncmp(pPREV1->data, "not", 3) == 0) || (strncmp(pPREV1->data, "1no", 3) == 0))
                 {
                     char *arr = "!";
+                    OUT = str_alloc_and_insert(OUT, arr);
                     OUT = str_alloc_and_insert(OUT, insert_str_pre);
                     pPREV = pPREV1->prev;
                     if ( pPREV !=NULL)
@@ -634,7 +628,8 @@ void Final_File_text(void)
                         OUT = str_alloc_and_insert(OUT, insert_str_pre);
                         pPREV = pPREV->prev;
                         if (pPREV == NULL)
-                        {
+                        {   
+                            OUT = str_alloc_and_insert(OUT, insert_str_pre);
                             break;
                         }
                     }
@@ -1069,7 +1064,16 @@ void Final_File_text(void)
             OUT = str_alloc_and_insert(insert_str_pre, OUT);
             OUT = str_alloc_and_insert(arr_temp, OUT);
             OUT = str_alloc_and_insert(OUT, insert_str_next);
-        }
+            p = p->next ;
+            if (strncmp(p->data, "(",1) == 0)
+            {
+                OUT = str_alloc_and_insert(OUT, insert_str_H);
+                OUT = str_alloc_and_insert(OUT,insert_str_pre);
+                p = p->next ;
+                continue;
+            }
+            continue;
+        } 
         else if (strcmp(p->data, "=") == 0) // q0.1=(A*B)\n
         {
             int size_OUT = strlen(OUT);
