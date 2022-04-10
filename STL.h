@@ -20,6 +20,7 @@ void ConvFrList(FILE *fopen, int Row_Of_File); // Chuyển về List 1 gồm t�
 void ListFinal(void);                          // Gom các ký tự câu lệnh (biến) vào 1 data , bổ sung H vào biến thường đóng , bổ xung "sl" nếu là suòn lên hoặc "sx" nếu là sườn xuống
 void BranchWithFirst_F(void);                  // Tách nhánh
 void Final_File_text(void);
+char* CountParentheses(char *arr ) ;
 char *str_alloc_and_insert(const char *str1, const char *str2) // chèn tại cuối chuỗi 
 {
 
@@ -88,10 +89,10 @@ char* str_alloc_and_insert_every(const char* str1, size_t pos, const char* str2)
 
     return result;
 }
-
-void CountParentheses (char *arr   )  // Kiểm tra xem Dấu ( = ) nếu ko bằng thì chèn thêm ;
+char* CountParentheses(char *arr )
 {   
-        char *insert_str_pre = "(";
+
+    char *insert_str_pre = "(";
     char *insert_str_next = ")";
     int size_arr = strlen(arr);
             int left = 0;
@@ -120,6 +121,6 @@ void CountParentheses (char *arr   )  // Kiểm tra xem Dấu ( = ) nếu ko b�
                 left ++ ;
             }
             }
+        return arr ;
 }
-
 #endif
