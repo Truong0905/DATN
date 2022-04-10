@@ -718,12 +718,10 @@ void Final_File_text(void)
             }
             if (((strcmp(p->data, "ALD") == 0) || (strcmp(p->data, "OLD") == 0)) && check_H == 1)
             {
-                CountParentheses(OUT);
+               OUT =  CountParentheses(OUT);
                 OUT = str_alloc_and_insert(OUTtemp_H, OUT);
                 check_H = 0;
                 count++;
-                free(OUTtemp_H);
-                OUTtemp_H = (char *)calloc(1, sizeof(char));
                 OUTtemp_H = "";
             }
 
@@ -803,7 +801,7 @@ void Final_File_text(void)
 
             if (((strcmp(p->data, "ALD") == 0) || (strcmp(p->data, "OLD") == 0)) && check_H == 1)
             {
-                CountParentheses(OUT);
+                OUT =  CountParentheses(OUT); 
                 OUT = str_alloc_and_insert(OUTtemp_H, OUT);
                 check_H = 0;
                 count++;
@@ -817,7 +815,8 @@ void Final_File_text(void)
         else if (strcmp(p->data, "ALD") == 0)
         {
             if (count > 1)
-            {
+            {   
+                OUT =  CountParentheses(OUT);
                 int size_TK = 0;
                 int size_TK_temp = 0;
                 int count_temp = 0;
@@ -892,7 +891,7 @@ void Final_File_text(void)
             pNEXT1 = pNEXT->next;
             if ((check_H == 1) && (((strncmp(pNEXT1->data, "OLD", 1) == 0) || (strncmp(pNEXT1->data, "ALD", 1) == 0)) || ((strncmp(pNEXT->data, "OLD", 1) == 0) || (strncmp(pNEXT->data, "ALD", 1) == 0))))
             {
-                CountParentheses(OUT);
+                 OUT =  CountParentheses(OUT);
                 OUT = str_alloc_and_insert(OUTtemp_H, OUT);
                 check_H = 0;
                 count++;
@@ -906,7 +905,8 @@ void Final_File_text(void)
         {
 
             if (count > 1)
-            {
+            {   
+                 OUT =  CountParentheses(OUT);
                 int size_TK = 0;
                 int size_TK_temp = 0;
                 int count_temp = 0;
@@ -981,7 +981,7 @@ void Final_File_text(void)
             pNEXT1 = pNEXT->next;
             if ((check_H == 1) && (((strncmp(pNEXT1->data, "OLD", 1) == 0) || (strncmp(pNEXT1->data, "ALD", 1) == 0)) || ((strncmp(pNEXT->data, "OLD", 1) == 0) || (strncmp(pNEXT->data, "ALD", 1) == 0))))
             {
-                CountParentheses(OUT);
+               OUT =  CountParentheses(OUT);
                 OUT = str_alloc_and_insert(OUTtemp_H, OUT);
                 check_H = 0;
                 count++;
@@ -1013,7 +1013,7 @@ void Final_File_text(void)
             }
             if (((strcmp(p->data, "ALD") == 0) || (strcmp(p->data, "OLD") == 0)) && check_H == 1)
             {
-                CountParentheses(OUT);
+                 OUT =  CountParentheses(OUT);
                 OUT = str_alloc_and_insert(OUTtemp_H, OUT);
                 check_H = 0;
                 count++;
@@ -1026,8 +1026,8 @@ void Final_File_text(void)
         else if (strcmp(p->data, "=") == 0) // q0.1=(A*B)\n
         {
 
-            CountParentheses(OUT);
-            char *arr3 = ";\n";
+            OUT =  CountParentheses(OUT);
+            char *arr3 = " ;\n";
             OUT = str_alloc_and_insert(OUT, arr3);
             OUT = str_alloc_and_insert(p->data, OUT);
             p = p->next;
