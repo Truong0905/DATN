@@ -580,14 +580,6 @@ void Final_File_text(void)
                     OUT = str_alloc_and_insert(OUT, insert_str_next);
                 }
             }
-            // else if (strncmp(pNEXT->data, "not", 3) == 0)
-            // {
-            //     char *arr_temp = "!";
-            //     OUT = str_alloc_and_insert(OUT, arr_temp);
-            //     OUT = str_alloc_and_insert(OUT, insert_str_pre);
-            //     p = pNEXT1->next;
-            //     continue;
-            // }
             else if (strncmp(pNEXT->data, "1no", 3) == 0)
             {
                 OUT = str_alloc_and_insert(OUT, insert_str_next);
@@ -617,7 +609,7 @@ void Final_File_text(void)
                     char *arr = "!";
                     OUT = str_alloc_and_insert(OUT, arr);
                     OUT = str_alloc_and_insert(OUT, insert_str_pre);
-                     OUT = str_alloc_and_insert(OUT, insert_str_pre);
+                    OUT = str_alloc_and_insert(OUT, insert_str_pre);
                     pPREV = pPREV1->prev;
                     if (pPREV != NULL)
                     {
@@ -628,24 +620,11 @@ void Final_File_text(void)
                             pPREV = pPREV->prev;
                             if (pPREV == NULL)
                             {
-                                OUT = str_alloc_and_insert(OUT, insert_str_pre);
                                 break;
                             }
                         }
                     }
                 }
-            }
-
-            if (strcmp(pNEXT1->data, "NOT") == 0) // not cho 1 biến duy nhất
-            {
-                OUT = str_alloc_and_insert(OUT, pNEXT->data);
-                p = pNEXT1->next;
-                if ((strcmp(p->data, "A") != 0) && (strcmp(p->data, "AN") != 0) && (strcmp(p->data, "O") != 0) && (strcmp(p->data, "ON") != 0))
-                {
-                    OUT = str_alloc_and_insert(OUT, insert_str_next);
-                }
-
-                continue;
             }
             OUT = str_alloc_and_insert(OUT, pNEXT->data);
             p = pNEXT1;
