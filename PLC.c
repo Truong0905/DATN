@@ -617,6 +617,7 @@ void Final_File_text(void)
                     char *arr = "!";
                     OUT = str_alloc_and_insert(OUT, arr);
                     OUT = str_alloc_and_insert(OUT, insert_str_pre);
+                     OUT = str_alloc_and_insert(OUT, insert_str_pre);
                     pPREV = pPREV1->prev;
                     if (pPREV != NULL)
                     {
@@ -854,12 +855,13 @@ void Final_File_text(void)
                 count = 1;
             }
 
-            OUT = str_alloc_and_insert(insert_str_pre, OUT); // Mở ngoặc cả cụm OLD này
+            OUT = str_alloc_and_insert(insert_str_pre, OUT); // Mở ngoặc cả cụm ALD này
             pNEXT = p->next;
             if (strncmp(pNEXT->data, "!", 1) == 0)
             {
                 char *arr_temp = "!";
                 OUT = str_alloc_and_insert(arr_temp, OUT);
+                p= p->next ;
             }
             int size_of_arr = strlen(OUT);
 
@@ -950,6 +952,7 @@ void Final_File_text(void)
             {
                 char *arr_temp = "!";
                 OUT = str_alloc_and_insert(arr_temp, OUT);
+                p = p->next ;
             }
             int size_of_arr = strlen(OUT);
 
