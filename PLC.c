@@ -340,8 +340,8 @@ void SplitBranchesWithFirstFinalPointer(void)
                         }
                         else
                         {
-                            char *arr_NEXT1 = "T_";
-                            pNext1->data = StrAllocAndAppend(arr_NEXT1, pNext1->data);
+
+                            pNext1->data = StrAllocAndAppend("T_", pNext1->data);
                         }
                     }
                     else
@@ -405,7 +405,6 @@ void FinalTextFile(void)
         {
 
             CheckEndNetWork = 0;
-            // char *OUTtemp_H = ""; // Kiểm tra xem có nhánh lớn trước đó không
             pMain = pMain->next;
             continue;
         }
@@ -518,8 +517,7 @@ void FinalTextFile(void)
             {
                 if ((strncmp(pPrev1->data, "not", 3) == 0) || (strncmp(pPrev1->data, "1no", 3) == 0))
                 {
-                    char *TempArray = "!";
-                    OutString = StrAllocAndAppend(OutString, TempArray);
+                    OutString = StrAllocAndAppend(OutString, "!");
                     OutString = StrAllocAndAppend(OutString, InsertOpeningBracket);
                     OutString = StrAllocAndAppend(OutString, InsertOpeningBracket);
                     pPrev = pPrev1->prev;
@@ -527,7 +525,7 @@ void FinalTextFile(void)
                     {
                         while ((strncmp(pPrev->data, "not", 3) == 0) || (strncmp(pPrev->data, "1no", 3) == 0))
                         {
-                            OutString = StrAllocAndAppend(OutString, TempArray);
+                            OutString = StrAllocAndAppend(OutString, "!");
                             OutString = StrAllocAndAppend(OutString, InsertOpeningBracket);
                             pPrev = pPrev->prev;
                             if (pPrev == NULL)
@@ -696,15 +694,14 @@ void FinalTextFile(void)
                 OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
                 CheckBigBranch = 0;
                 CountQuestionMark++;
-                OutCheckBigBranch = " ";
+                OutCheckBigBranch = "";
             }
             continue;
         }
         else if (strcmp(pMain->data, "T_NOT") == 0)
         {
-            char *arr_temp = "!";
             OutString = StrAllocAndAppend(InsertOpeningBracket, OutString);
-            OutString = StrAllocAndAppend(arr_temp, OutString);
+            OutString = StrAllocAndAppend("!", OutString);
             OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
             pMain = pMain->next;
             if (strncmp(pMain->data, ")", 1) == 0)
@@ -738,6 +735,7 @@ void FinalTextFile(void)
             OutString = StrAllocAndAppend(pMain->data, OutString);
             pMain = pMain->next;
             OutString = StrAllocAndAppend(pMain->data, OutString);
+            OutCheckBigBranch = "" ;
             fputs(OutString, pFile);
         }
         else if (strcmp(pMain->data, "CTU") == 0)
