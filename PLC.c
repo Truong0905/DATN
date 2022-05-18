@@ -192,7 +192,7 @@ void FinalList(void)
 
 void SplitBranchesWithFirstFinalPointer(void)
 {
-    LinkList *pCheck, *pMain, *pTemp ;
+    LinkList *pCheck, *pMain, *pTemp;
     LinkList *pNext, *pNext1, *pPrev, *pPrev1;
     int CoutOpen = 0;  // Đếm số "("
     int CoutClose = 0; // Đếm số ")"
@@ -220,7 +220,7 @@ void SplitBranchesWithFirstFinalPointer(void)
         }
         else
         {
-            if ((strcmp(pCheck->data, "ALD") == 0) || (strcmp(pCheck->data, "OLD") == 0) || (strcmp(pCheck->data, "TON") == 0) || (strcmp(pCheck->data, "CTU") == 0) || (strcmp(pCheck->data, "CTD") == 0) || (strcmp(pCheck->data, "CTUD") == 0))
+            if ((strcmp(pCheck->data, "ALD") == 0) || (strcmp(pCheck->data, "OLD") == 0) || (strcmp(pCheck->data, "TON") == 0) || (strcmp(pCheck->data, "TONR") == 0) || (strcmp(pCheck->data, "TOF") == 0) || (strcmp(pCheck->data, "CTU") == 0) || (strcmp(pCheck->data, "CTD") == 0) || (strcmp(pCheck->data, "CTUD") == 0))
             {
                 if ((strcmp(pCheck->data, "ALD") == 0) || (strcmp(pCheck->data, "OLD") == 0)) // not của 1 nhánh
                 {
@@ -387,18 +387,25 @@ void FinalTextFile(void)
     int CountQuestionMark = 0;    // Đếm số dấu "?"
     pFile = fopen("PLC_F.txt", "w");
     pMain = FirstFinal;
+    int CountNetWork = 0 ;
+    
     while (pMain != NULL)
     {
 
         if (CheckEndNetWork == 0) // Chưa kết thúc 1 network
         {
+            char buffer [50] ;
+            CountNetWork ++ ; 
+            sprintf(buffer,"/*--------------NetWork %d -----------*/\n",CountNetWork ) ;
+            fputs(buffer,pFile) ;
             OutString = "";
             CheckEndNetWork = 1;
         }
         if (strcmp(pMain->data, "N") == 0)
         {
+
             CheckEndNetWork = 0;
-            char *OUTtemp_H = ""; // Kiểm tra xem có nhánh lớn trước đó không
+            // char *OUTtemp_H = ""; // Kiểm tra xem có nhánh lớn trước đó không
             pMain = pMain->next;
             continue;
         }
@@ -545,14 +552,14 @@ void FinalTextFile(void)
             pPrev = pMain->prev; // LinkList *pPREV_temp = pPrev;
             pNext = pMain->next;
             pNext1 = pNext->next;
-           CheckNOT(&pMain,pNext,pNext1,&OutString,InsertMul) ;
+            CheckNOT(&pMain, pNext, pNext1, &OutString, InsertMul);
 
             while ((strcmp(pMain->data, "A") == 0) || (strcmp(pMain->data, "AN") == 0))
             {
 
                 pNext = pMain->next;
                 pNext1 = pNext->next;
-                CheckNOT(&pMain,pNext,pNext1,&OutString,InsertMul) ;
+                CheckNOT(&pMain, pNext, pNext1, &OutString, InsertMul);
             }
             if ((strcmp(pPrev->data, "ALD") == 0) || (strcmp(pPrev->data, "OLD") == 0)) // nhánh nhân hoặc cộng với biến
             {
@@ -560,7 +567,7 @@ void FinalTextFile(void)
             }
             if (strncmp(pMain->data, "(", 1) == 0)
             {
-                if ((strcmp(pPrev->data, "ALD") != 0) && (strcmp(pPrev->data, "OLD") != 0)) 
+                if ((strcmp(pPrev->data, "ALD") != 0) && (strcmp(pPrev->data, "OLD") != 0))
                 {
                     OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
                 }
@@ -591,13 +598,13 @@ void FinalTextFile(void)
             pPrev = pMain->prev;
             pNext = pMain->next;
             pNext1 = pNext->next;
-            CheckNOT(&pMain,pNext,pNext1,&OutString,Insertplus) ;
+            CheckNOT(&pMain, pNext, pNext1, &OutString, Insertplus);
             while ((strcmp(pMain->data, "O") == 0) || (strcmp(pMain->data, "ON") == 0))
             {
 
                 pNext = pMain->next;
                 pNext1 = pNext->next;
-                CheckNOT(&pMain,pNext,pNext1,&OutString,Insertplus) ;
+                CheckNOT(&pMain, pNext, pNext1, &OutString, Insertplus);
             }
             if ((strcmp(pPrev->data, "ALD") == 0) || (strcmp(pPrev->data, "OLD") == 0)) // nhánh nhân hoặc cộng với biến
             {
@@ -605,7 +612,7 @@ void FinalTextFile(void)
             }
             if (strncmp(pMain->data, "(", 1) == 0)
             {
-                if ((strcmp(pPrev->data, "ALD") != 0) && (strcmp(pPrev->data, "OLD") != 0)) 
+                if ((strcmp(pPrev->data, "ALD") != 0) && (strcmp(pPrev->data, "OLD") != 0))
                 {
                     OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
                 }
@@ -645,7 +652,7 @@ void FinalTextFile(void)
         else if (strcmp(pMain->data, "ALD") == 0)
         {
             CheckCountQuestionMark(&CountQuestionMark, &CheckBigBranch, OutString, OutCheckBigBranch);
-            AddPlusToOutString(&pMain,&OutString,&CountQuestionMark,InsertMul);
+            AddPlusToOutString(&pMain, OutString, &CountQuestionMark, InsertMul);
             if (strncmp(pMain->data, "(", 1) == 0)
             {
                 OutString = StrAllocAndAppend(OutString, InsertQuestionMark);
@@ -670,7 +677,7 @@ void FinalTextFile(void)
         else if (strcmp(pMain->data, "OLD") == 0)
         {
             CheckCountQuestionMark(&CountQuestionMark, &CheckBigBranch, OutString, OutCheckBigBranch);
-            AddPlusToOutString(&pMain,&OutString,&CountQuestionMark,Insertplus);
+            AddPlusToOutString(&pMain, OutString, &CountQuestionMark, Insertplus);
 
             if (strncmp(pMain->data, "(", 1) == 0)
             {
@@ -727,8 +734,7 @@ void FinalTextFile(void)
         {
 
             OutString = AddParenthesesIfMissing(OutString);
-            char *arr3 = " ;\n";
-            OutString = StrAllocAndAppend(OutString, arr3);
+            OutString = StrAllocAndAppend(OutString, " ;\n");
             OutString = StrAllocAndAppend(pMain->data, OutString);
             pMain = pMain->next;
             OutString = StrAllocAndAppend(pMain->data, OutString);
@@ -736,66 +742,83 @@ void FinalTextFile(void)
         }
         else if (strcmp(pMain->data, "CTU") == 0)
         {
-            // do some thing
-            char *arr1 = "(";
-            char *arr2 = ")";
-            OutString = StrAllocAndAppend(arr1, OutString);
-            OutString = StrAllocAndAppend(OutString, arr2);
-            char *arr3 = "\n";
-            OutString = StrAllocAndAppend(OutString, arr3); // OUT : = (a*b)\n
+            OutString = AddParenthesesIfMissing(OutString);
+            CheckBigBranch = 0;
+            CountQuestionMark = 0;
+            if (strlen(OutCheckBigBranch) != 0)
+            {
+                OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
+                OutCheckBigBranch = "";
+            }
+            SetupCounterUpOrDown(&pMain,OutString,"_CTU =",pFile);
+
+
         }
         else if (strcmp(pMain->data, "CTD") == 0)
         {
-            OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
+            OutString = AddParenthesesIfMissing(OutString);
             CheckBigBranch = 0;
             CountQuestionMark = 0;
-            free(OutCheckBigBranch);
-            OutCheckBigBranch = (char *)calloc(1, sizeof(char));
-            OutCheckBigBranch = "";
-            // do some thing
-            // do some thing
-            char *arr3 = "\n";
-            OutString = StrAllocAndAppend(OutString, arr3); // OUT : = (a*b)\n
+            if (strlen(OutCheckBigBranch) != 0)
+            {
+                OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
+                OutCheckBigBranch = "";
+            }
+            SetupCounterUpOrDown(&pMain,OutString,"_CTD =",pFile);
+
         }
         else if (strcmp(pMain->data, "CTUD") == 0)
         {
-
-            OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
+            OutString = AddParenthesesIfMissing(OutString);
             CheckBigBranch = 0;
             CountQuestionMark = 0;
-            free(OutCheckBigBranch);
-            OutCheckBigBranch = (char *)calloc(1, sizeof(char));
-            OutCheckBigBranch = "";
-            // do some thing
-            // do some thing
-            char *arr3 = "\n";
-            OutString = StrAllocAndAppend(OutString, arr3); // OUT : = (a*b)\n
+            if (strlen(OutCheckBigBranch) != 0)
+            {
+                OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
+                OutCheckBigBranch = "";
+            }
+            SetupCounterUpDown(&pMain ,OutString,pFile);
+
         }
         else if (strcmp(pMain->data, "TON") == 0)
         {
-            OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
+            OutString = AddParenthesesIfMissing(OutString);
+
             CheckBigBranch = 0;
             CountQuestionMark = 0;
-            free(OutCheckBigBranch);
-            OutCheckBigBranch = (char *)calloc(1, sizeof(char));
-            OutCheckBigBranch = "";
-            // do some thing
-            // do some thing
-            char *arr3 = "\n";
-            OutString = StrAllocAndAppend(OutString, arr3); // OUT : = (a*b)\n
+            if (strlen(OutCheckBigBranch) != 0)
+            {
+                OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
+                OutCheckBigBranch = "";
+            }
+            SetupTimer(&pMain,OutString, "_ON = ");
+            fputs(OutString, pFile);
         }
         else if (strcmp(pMain->data, "TOF") == 0)
         {
-            OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
+            OutString = AddParenthesesIfMissing(OutString);
             CheckBigBranch = 0;
             CountQuestionMark = 0;
-            free(OutCheckBigBranch);
-            OutCheckBigBranch = (char *)calloc(1, sizeof(char));
-            OutCheckBigBranch = "";
-            // do some thing
-            // do some thing
-            char *arr3 = "\n";
-            OutString = StrAllocAndAppend(OutString, arr3); // OUT : = (a*b)\n
+            if (strlen(OutCheckBigBranch) != 0)
+            {
+                OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
+                OutCheckBigBranch = "";
+            }
+            SetupTimer(&pMain, OutString, "_OF = ");
+            fputs(OutString, pFile);
+        }
+        else if (strcmp(pMain->data, "TONR") == 0)
+        {
+            OutString = AddParenthesesIfMissing(OutString);
+            CheckBigBranch = 0;
+            CountQuestionMark = 0;
+            if (strlen(OutCheckBigBranch) != 0)
+            {
+                OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
+                OutCheckBigBranch = "";
+            }
+            SetupTimer(&pMain, OutString, "_ONR = ");
+            fputs(OutString, pFile);
         }
         pMain = pMain->next;
     }
