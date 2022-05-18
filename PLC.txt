@@ -1,0 +1,29 @@
+LDN    I1.1
+A      I1.2
+EU
+LD     I1.3
+A      I1.4
+A      I1.5
+OLD
+LDN    I1.6
+A      I1.7
+OLD
+A      I1.7
+A      I2.0
+LD     I2.1
+LD     I2.3
+A      I2.4
+OLD
+LD     I2.5
+A      I2.6
+OLD
+A      I2.2
+OLD
+LD     I4.0
+A      I4.1
+A      I5.0
+OLD
+A      I4.2
+A      I4.3
+=      Q0.0
+N
