@@ -275,37 +275,108 @@ void CheckNOT(LinkList *(*pMain) ,LinkList *pNext, LinkList *pNext1 , char *(*Ou
             }
 }
 
-void AddPlusToOutString(LinkList *(*pMain), char *(*OutString) , int *CountQuestionMark , char* Insert )
+void AddPlusToOutString(LinkList *(*pMain), char *OutString , int *CountQuestionMark , char* Insert )
 {
             char *InsertOpeningBracket = "("; 
             char *InsertClosingBracket = ")";
             LinkList *pNext ;
-           *OutString = StrAllocAndAppend(InsertOpeningBracket, *OutString); // Mở ngoặc cả cụm ALD này
+           OutString = StrAllocAndAppend(InsertOpeningBracket, OutString); // Mở ngoặc cả cụm ALD này
             pNext = (*pMain)->next;
             if (strncmp(pNext->data, "!", 1) == 0)
             {
                 char *arr_temp = "!";
-                *OutString = StrAllocAndAppend(arr_temp, *OutString);
+                OutString = StrAllocAndAppend(arr_temp, OutString);
                 *pMain = (*pMain)->next;
             }
-            int size_of_arr = strlen(*OutString);
+            int size_of_arr = strlen(OutString);
 
             char *OUTtemp, *OUTtemp1;
             OUTtemp = (char *)calloc(size_of_arr, sizeof(char));
-            strcpy(OUTtemp, *OutString);
+            strcpy(OUTtemp, OutString);
             char *token = strtok(OUTtemp, "?");
             OUTtemp = StrAllocAndAppend(OUTtemp, Insert);
             (*CountQuestionMark)-- ;  // Thay đấu "?" bằng dấu "+"
             token = strtok(NULL, " ");
             OUTtemp1 = StrAllocAndAppend(OUTtemp, token);
-            free(*OutString);
+            free(OutString);
             size_of_arr = strlen(OUTtemp1);
-            *OutString = (char *)calloc(size_of_arr, sizeof(char));
-            strcpy(*OutString, OUTtemp1);
-            *OutString = StrAllocAndAppend(*OutString, InsertClosingBracket); // Đóng ngoặc cụm ALD này
+            OutString = (char *)calloc(size_of_arr, sizeof(char));
+            strcpy(OutString, OUTtemp1);
+            OutString = StrAllocAndAppend(OutString, InsertClosingBracket); // Đóng ngoặc cụm ALD này
             free(OUTtemp1);
             *pMain = (*pMain)->next;
 }
+
+void SetupTimer( LinkList *(*pMain), char *OutString,  char *NameTimer )
+{           
+            char *temparray =""; 
+             *pMain = (*pMain)->next;
+            (*pMain)->data = StrAllocAndAppend((*pMain)->data,NameTimer) ;
+            temparray = StrAllocAndAppend(temparray ,(*pMain)->data  ) ;
+            (*pMain)->data = StrAllocAndAppend("vao",(*pMain)->data) ;
+            OutString = StrAllocAndAppend(OutString," ;\n") ;
+            OutString = StrAllocAndAppend((*pMain)->data,OutString) ;
+           *pMain = (*pMain)->next;
+            temparray = StrAllocAndAppend("dat",temparray) ;
+            temparray = StrAllocAndAppend(temparray,(*pMain)->data) ;
+            OutString = StrAllocAndAppend(OutString , temparray);
+            OutString = StrAllocAndAppend(OutString," ;\n") ;
+}
+void SetupCounterUpOrDown( LinkList *(*pMain), char *OutString,char *NameCounter , FILE *pFile ) // "_CTU ="
+{
+            char *TempArry = "";
+             char *token = strtok(OutString, "?"); 
+            *pMain = (*pMain)->next;
+             TempArry = StrAllocAndAppend((*pMain)->data,NameCounter);
+             TempArry = StrAllocAndAppend("vao",TempArry);
+             TempArry= StrAllocAndAppend(TempArry,token);
+            TempArry  = StrAllocAndAppend(TempArry," ;\n" );
+             fputs(TempArry, pFile);
+             token = strtok(NULL, "?");
+             TempArry = StrAllocAndAppend((*pMain)->data,NameCounter);
+             TempArry = StrAllocAndAppend("reset",TempArry);
+             TempArry= StrAllocAndAppend(TempArry,token);
+            TempArry  = StrAllocAndAppend(TempArry," ;\n" );
+             fputs(TempArry, pFile);
+            TempArry = StrAllocAndAppend((*pMain)->data,NameCounter);
+             TempArry = StrAllocAndAppend("dat",TempArry);
+              *pMain = (*pMain)->next; 
+              TempArry = StrAllocAndAppend(TempArry , (*pMain)->data) ;
+               TempArry  = StrAllocAndAppend(TempArry," ;\n" );
+            fputs(TempArry, pFile);
+    
+}
+void SetupCounterUpDown( LinkList *(*pMain), char *OutString,FILE *pFile ) // "_CTU ="
+{
+            char *TempArry = "";
+             char *token = strtok(OutString, "?"); 
+            *pMain = (*pMain)->next;
+             TempArry = StrAllocAndAppend((*pMain)->data,"_CTUD = " );
+             TempArry = StrAllocAndAppend("tang",TempArry);
+             TempArry= StrAllocAndAppend(TempArry,token);
+            TempArry  = StrAllocAndAppend(TempArry," ;\n" );
+             fputs(TempArry, pFile);
+             token = strtok(NULL, "?");
+             TempArry = StrAllocAndAppend((*pMain)->data,"_CTUD = ");
+             TempArry = StrAllocAndAppend("giam",TempArry);
+             TempArry= StrAllocAndAppend(TempArry,token);
+            TempArry  = StrAllocAndAppend(TempArry," ;\n" );
+             fputs(TempArry, pFile);
+            token = strtok(NULL, "?");
+             TempArry = StrAllocAndAppend((*pMain)->data,"_CTUD = ");
+             TempArry = StrAllocAndAppend("reset",TempArry);
+             TempArry= StrAllocAndAppend(TempArry,token);
+            TempArry  = StrAllocAndAppend(TempArry," ;\n" );
+             fputs(TempArry, pFile);
+            TempArry = StrAllocAndAppend((*pMain)->data,"_CTUD = ");
+             TempArry = StrAllocAndAppend("dat",TempArry);
+              *pMain = (*pMain)->next; 
+              TempArry = StrAllocAndAppend(TempArry , (*pMain)->data) ;
+               TempArry  = StrAllocAndAppend(TempArry," ;\n" );
+            fputs(TempArry, pFile);
+    
+}
+
 
 
 #endif
