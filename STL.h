@@ -47,7 +47,7 @@ char *AddParenthesesIfMissing(char *arr);
 void CheckCountQuestionMark(int *CountQuestionMark, int *CheckBigBranch, char *(*OutString), char *(*OutCheckBigBranch));
 void CheckNOT(LinkList *(*pMain), LinkList *pNext, LinkList *pNext1, char *(*OutString), char *Insert);
 void AddPlusToOutString(LinkList *(*pMain), char *(*OutString), int *CountQuestionMark, char *Insert);
-void SetupTimer(LinkList *(*pMain), char *(*OutString), char *NameTimer);
+void SetupTimer(LinkList *(*pMain), char *(*OutString), char *NameTimer,FILE *pFileTimer,int CountTimer);
 void SetupCounterUpOrDown(LinkList *(*pMain), char *OutString, char *NameCounter, FILE *pFile);
 void SetupCounterUpDown(LinkList *(*pMain), char *OutString, FILE *pFile);
 char *CheckQuestionMask (int CountQuestionMark,char *OutString) ;
