@@ -3,35 +3,35 @@
 LinkList *First, *Last, *FirstFinal, *LastFinal; // First và Last dùng cho  TransferToList ()   ; FirstFinal , LastFinal  là chuỗi cuối cùng cần tìm
 
 stringHashTable SaveIO[PrimeNumber];
+FILE *pFileTimer = NULL ;
+int CountTimer = 0 ;
 int main(void)
 {
     FILE *pMainFile = NULL;
     LinkList *pTest;
     int row = 0;
     InitSaveDataIO();
-        for (int i = 0; i < PrimeNumber; i++)
-    {
-        if (strcmp(SaveIO[i], "vacant") != 0 && (strcmp(SaveIO[i], "delete") != 0))
-            printf("%d .  %s  \n", i, SaveIO[i]);
-    }
     pMainFile = ReadTextFile(&row); // Tạo file PLC.txt
     TransferToList(pMainFile, row);
     fclose(pMainFile); // Đóng  file PLC.txt
     FinalList();
-
     SaveDataIO();
-    FileDefineData();
-
-    FileData(pMainFile);
     SplitBranchesWithFirstFinalPointer();
     pTest = FirstFinal;
-    while (pTest != NULL)
-    {
-        printf("%s ", pTest->data);
-        pTest = pTest->next;
-    }
+    // while (pTest != NULL)
+    // {
+    //     printf("%s ", pTest->data);
+    //     pTest = pTest->next;
+    // }
+    FileData(pMainFile);
     FinalTextFile(pMainFile); // Tạo file PLC_F.txt
     fclose(pMainFile);        // Đóng file PLC_F.txt
+     for (int i = 0; i < PrimeNumber; i++)
+    {
+        if (strcmp(SaveIO[i], "vacant") != 0 && (strcmp(SaveIO[i], "delete") != 0))
+            printf("%d .  %s  \n", i, SaveIO[i]);
+    }
+    FileDefineData();
     return EXIT_SUCCESS;
 }
 
@@ -498,6 +498,7 @@ void FinalTextFile(FILE *pFile)
     int CountQuestionMark = 0;    // Đếm số dấu "?"
     pMain = FirstFinal;
     int CountNetWork = 0;
+    int checkTimer = 1 ;
 
     while (pMain != NULL)
     {
@@ -889,6 +890,13 @@ void FinalTextFile(FILE *pFile)
         }
         else if (strcmp(pMain->data, "TON") == 0)
         {
+            if ( checkTimer == 1 )
+            {
+                pFileTimer = fopen("Timer.txt","w");
+                fprintf(pFileTimer, "void initTimer(void)\n");
+                fprintf(pFileTimer, "{\n");
+                checkTimer = 0 ;
+            }
             OutString = AddParenthesesIfMissing(OutString);
 
             CheckBigBranch = 0;
@@ -898,11 +906,19 @@ void FinalTextFile(FILE *pFile)
                 OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
                 OutCheckBigBranch = "";
             }
-            SetupTimer(&pMain, &OutString, "_ON = ");
+            SetupTimer(&pMain, &OutString, "_ON = ",pFileTimer,CountTimer);
+            CountTimer++ ;
             fputs(OutString, pFile);
         }
         else if (strcmp(pMain->data, "TOF") == 0)
         {
+            if ( checkTimer == 1 )
+            {
+                pFileTimer = fopen("Timer.txt","w");
+                fprintf(pFileTimer, "void initTimer(void)\n");
+                fprintf(pFileTimer, "{\n");
+                checkTimer = 0 ;
+            }
             OutString = AddParenthesesIfMissing(OutString);
             CheckBigBranch = 0;
             CountQuestionMark = 0;
@@ -911,11 +927,19 @@ void FinalTextFile(FILE *pFile)
                 OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
                 OutCheckBigBranch = "";
             }
-            SetupTimer(&pMain, &OutString, "_OF = ");
+            SetupTimer(&pMain, &OutString, "_OF = ",pFileTimer,CountTimer);
+            CountTimer ++ ;
             fputs(OutString, pFile);
         }
         else if (strcmp(pMain->data, "TONR") == 0)
         {
+            if ( checkTimer == 1 )
+            {
+                pFileTimer = fopen("Timer.txt","w");
+                fprintf(pFileTimer, "void initTimer(void)\n");
+                fprintf(pFileTimer, "{\n");
+                checkTimer = 0 ;
+            }
             OutString = AddParenthesesIfMissing(OutString);
             CheckBigBranch = 0;
             CountQuestionMark = 0;
@@ -924,7 +948,8 @@ void FinalTextFile(FILE *pFile)
                 OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
                 OutCheckBigBranch = "";
             }
-            SetupTimer(&pMain, &OutString, "_ONR = ");
+            SetupTimer(&pMain, &OutString, "_ONR = ",pFileTimer,CountTimer);
+            CountTimer++ ;
             fputs(OutString, pFile);
         }
         else if (strcmp(pMain->data, "MOVB") == 0)
