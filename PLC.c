@@ -1,30 +1,109 @@
 #include "STL.h"
+
+LinkList *First, *Last, *FirstFinal, *LastFinal; // First và Last dùng cho  TransferToList ()   ; FirstFinal , LastFinal  là chuỗi cuối cùng cần tìm
+
+stringHashTable SaveIO[PrimeNumber];
 int main(void)
 {
-    FILE *fptest = NULL;
-    LinkList *p;
-    int row = 0U;
-    fptest = ReadTextFile(&row);
-    TransferToList(fptest, row);
-    FinalList();
-    SplitBranchesWithFirstFinalPointer();
-    p = FirstFinal;
-    while (p != NULL)
+    FILE *pMainFile = NULL;
+    LinkList *pTest;
+    int row = 0;
+    InitSaveDataIO();
+        for (int i = 0; i < PrimeNumber; i++)
     {
-        printf("%s ", p->data);
-        p = p->next;
+        if (strcmp(SaveIO[i], "vacant") != 0 && (strcmp(SaveIO[i], "delete") != 0))
+            printf("%d .  %s  \n", i, SaveIO[i]);
     }
-    FinalTextFile();
+    pMainFile = ReadTextFile(&row); // Tạo file PLC.txt
+    TransferToList(pMainFile, row);
+    fclose(pMainFile); // Đóng  file PLC.txt
+    FinalList();
 
-    fclose(fptest);
-    return 0;
+    SaveDataIO();
+    FileDefineData();
+
+    FileData(pMainFile);
+    SplitBranchesWithFirstFinalPointer();
+    pTest = FirstFinal;
+    while (pTest != NULL)
+    {
+        printf("%s ", pTest->data);
+        pTest = pTest->next;
+    }
+    FinalTextFile(pMainFile); // Tạo file PLC_F.txt
+    fclose(pMainFile);        // Đóng file PLC_F.txt
+    return EXIT_SUCCESS;
 }
+
+void InitSaveDataIO(void)
+{
+    for (int i = 0; i < PrimeNumber; i++)
+    {
+        strcpy(SaveIO[i], "vacant");
+    }
+
+    // char B[] = "B";
+    // char W[] = "W";
+    // char DW[] = "DW";
+
+    // char LD[] = "LD";
+    // char A[] = "A";
+    // char O[] = "O";
+    // char temp[15];
+    // for (int i = 0; i < 3; i++)
+    // {
+    //     char *check1, *check2;
+    //     if (i == 0)
+    //     {
+    //         check1 = LD;
+    //     }
+    //     else if (i == 1)
+    //     {
+    //         check1 = A;
+    //     }
+    //     else
+    //     {
+    //         check1 = O;
+    //     }
+    //     for (int j = 0; j < 3; j++)
+    //     {
+    //         if (j == 0)
+    //         {
+    //             check2 = B ;
+    //         }
+    //         else if (j == 1)
+    //         {
+    //             check2 = W;
+    //         }
+    //         else
+    //         {
+    //             check2 = DW;
+    //         }
+
+    //         sprintf(temp, "%s%s=", check1,check2);
+    //         H_InsertFunction(temp);
+    //         sprintf(temp, "%s%s>",  check1,check2);
+    //         H_InsertFunction(temp);
+    //         sprintf(temp, "%s%s<",  check1,check2);
+    //         H_InsertFunction(temp);
+    //         sprintf(temp, "%s%s<>",  check1,check2);
+    //         H_InsertFunction(temp);
+    //         sprintf(temp, "%s%s<=",  check1,check2);
+    //         H_InsertFunction(temp);
+    //         sprintf(temp, "%s%s>=", check1,check2);
+    //         H_InsertFunction(temp);
+    //     }
+    // }
+
+
+}
+
 FILE *ReadTextFile(int *RowOfFile)
 {
     FILE *pfile = NULL, *pFileFinal = NULL;
 
-    char TempArray[20];
-    int count;
+    char TempArray[30];
+    int count = 0;
     int ReductionCount = 0;
     int CheckProgram = 0; // Kiểm tra xem đã vào chương trình chưa
     pFileFinal = fopen("PLC.txt", "w");
@@ -124,6 +203,36 @@ void TransferToList(FILE *pFileFinal, int RowOfFile)
     }
 }
 
+void SaveDataIO(void)
+{
+    LinkList *pMain, *pNext;
+    pMain = FirstFinal;
+    while (pMain != NULL)
+    {
+        if ((strcmp(pMain->data, "LD") == 0))
+        {
+            pMain = pMain->next;
+            H_InsertFunction(pMain->data);
+        }
+        else if ((strcmp(pMain->data, "O") == 0))
+        {
+            pMain = pMain->next;
+            H_InsertFunction(pMain->data);
+        }
+        else if ((strcmp(pMain->data, "A") == 0))
+        {
+            pMain = pMain->next;
+            H_InsertFunction(pMain->data);
+        }
+        else if ((strcmp(pMain->data, "=") == 0))
+        {
+            pMain = pMain->next;
+            H_InsertFunction(pMain->data);
+        }
+        pMain = pMain->next;
+    }
+}
+
 void FinalList(void)
 {
     LinkList *pMainOfFirst, *pMainOfFirstFinal;
@@ -147,13 +256,15 @@ void FinalList(void)
                 pMainOfFirstFinal->data = (char *)calloc(SizeOfToken, sizeof(char));
                 strcpy(pMainOfFirstFinal->data, token);
             }
-            else // Nếu là tiếp điểm thường  đóng thì tăng size dữ liệu lên 1 nữa để lưu Token và ký tự 'H'
+            else // Nếu là tiếp điểm thường  đóng
             {
-
-                char *TempArray = "H";
                 pMainOfFirstFinal->data = (char *)calloc(SizeOfToken, sizeof(char));
                 strcpy(pMainOfFirstFinal->data, token);
-                pMainOfFirstFinal->data = StrAllocAndAppend(pMainOfFirstFinal->data, TempArray);
+                // Chèn tín hiệu thường đóng vào bảng
+                H_InsertFunction(pMainOfFirstFinal->data);
+                // Chèn tín hiệu thường đóng vào  Link list (!I0_0)
+                pMainOfFirstFinal->data = StrAllocAndAppend("(!", pMainOfFirstFinal->data);
+                pMainOfFirstFinal->data = StrAllocAndAppend(pMainOfFirstFinal->data, ")");
                 CheckClose = 0;
             }
             /// Lưu địa chỉ con trỏ FirstFinal và con trỏ LastFinal
@@ -371,33 +482,32 @@ void SplitBranchesWithFirstFinalPointer(void)
     }
 }
 
-void FinalTextFile(void)
+void FinalTextFile(FILE *pFile)
 {
     LinkList *pMain, *pNext, *pNext1, *pPrev, *pPrev1;
-    FILE *pFile;
+    fprintf(pFile, "{\n");
     char *OutString;
     char *InsertOpeningBracket = "(";
     char *InsertClosingBracket = ")";
-    char *InsertMul = "*";
-    char *Insertplus = "+";
+    char *InsertMul = "&";
+    char *Insertplus = "|";
     char *InsertQuestionMark = "?";
     int CheckEndNetWork = 0; // Kiểm tra xem hết 1 network chưa
     int CheckBigBranch = 0;
     char *OutCheckBigBranch = ""; // Kiểm tra xem có nhánh lớn trước đó không
     int CountQuestionMark = 0;    // Đếm số dấu "?"
-    pFile = fopen("PLC_F.txt", "w");
     pMain = FirstFinal;
-    int CountNetWork = 0 ;
-    
+    int CountNetWork = 0;
+
     while (pMain != NULL)
     {
 
         if (CheckEndNetWork == 0) // Chưa kết thúc 1 network
         {
-            char buffer [50] ;
-            CountNetWork ++ ; 
-            sprintf(buffer,"/*--------------NetWork %d -----------*/\n",CountNetWork ) ;
-            fputs(buffer,pFile) ;
+            char buffer[50];
+            CountNetWork++;
+            sprintf(buffer, "/*--------------NetWork %d -----------*/\n\n", CountNetWork);
+            fputs(buffer, pFile);
             OutString = "";
             CheckEndNetWork = 1;
         }
@@ -575,6 +685,10 @@ void FinalTextFile(void)
                 OutString = StrAllocAndAppend(OutString, InsertOpeningBracket);
                 pMain = pMain->next;
             }
+            if (((strcmp(pMain->data, "O") == 0) || (strcmp(pMain->data, "ON") == 0)) && ((strcmp(pPrev->data, "ALD") != 0) && (strcmp(pPrev->data, "OLD") != 0)))
+            {
+                OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
+            }
 
             if ((strncmp(pMain->data, ")", 1) == 0) && ((strcmp(pPrev->data, "ALD") == 0) || (strcmp(pPrev->data, "OLD") == 0)))
             {
@@ -623,12 +737,6 @@ void FinalTextFile(void)
             if (((strcmp(pMain->data, "A") == 0) || (strcmp(pMain->data, "AN") == 0)) && ((strcmp(pPrev->data, "ALD") != 0) && (strcmp(pPrev->data, "OLD") != 0)))
             {
                 OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
-                if ((strcmp(pPrev1->data, "A") == 0) || (strcmp(pPrev1->data, "AN") == 0))
-                {
-                    OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
-                    OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
-                    OutString = StrAllocAndAppend(InsertOpeningBracket, OutString);
-                }
             }
 
             if ((strncmp(pMain->data, ")", 1) == 0) && ((strcmp(pPrev->data, "ALD") == 0) || (strcmp(pPrev->data, "OLD") == 0)))
@@ -649,8 +757,8 @@ void FinalTextFile(void)
         }
         else if (strcmp(pMain->data, "ALD") == 0)
         {
-            CheckCountQuestionMark(&CountQuestionMark, &CheckBigBranch, OutString, OutCheckBigBranch);
-            AddPlusToOutString(&pMain, OutString, &CountQuestionMark, InsertMul);
+            CheckCountQuestionMark(&CountQuestionMark, &CheckBigBranch, &OutString, &OutCheckBigBranch);
+            AddPlusToOutString(&pMain, &OutString, &CountQuestionMark, InsertMul);
             if (strncmp(pMain->data, "(", 1) == 0)
             {
                 OutString = StrAllocAndAppend(OutString, InsertQuestionMark);
@@ -661,8 +769,7 @@ void FinalTextFile(void)
                 continue;
             }
             pNext = pMain->next;
-            pNext1 = pNext->next;
-            if ((CheckBigBranch == 1) && (((strncmp(pNext1->data, "OLD", 1) == 0) || (strncmp(pNext1->data, "ALD", 1) == 0)) || ((strncmp(pNext->data, "OLD", 1) == 0) || (strncmp(pNext->data, "ALD", 1) == 0))))
+            if ((CheckBigBranch == 1) && (((strncmp(pMain->data, "OLD", 1) == 0) || (strncmp(pMain->data, "ALD", 1) == 0)) || ((strncmp(pNext->data, "OLD", 1) == 0) || (strncmp(pNext->data, "ALD", 1) == 0))))
             {
                 OutString = AddParenthesesIfMissing(OutString);
                 OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
@@ -674,8 +781,8 @@ void FinalTextFile(void)
         }
         else if (strcmp(pMain->data, "OLD") == 0)
         {
-            CheckCountQuestionMark(&CountQuestionMark, &CheckBigBranch, OutString, OutCheckBigBranch);
-            AddPlusToOutString(&pMain, OutString, &CountQuestionMark, Insertplus);
+            CheckCountQuestionMark(&CountQuestionMark, &CheckBigBranch, &OutString, &OutCheckBigBranch);
+            AddPlusToOutString(&pMain, &OutString, &CountQuestionMark, Insertplus);
 
             if (strncmp(pMain->data, "(", 1) == 0)
             {
@@ -687,8 +794,7 @@ void FinalTextFile(void)
                 continue;
             }
             pNext = pMain->next;
-            pNext1 = pNext->next;
-            if ((CheckBigBranch == 1) && (((strncmp(pNext1->data, "OLD", 1) == 0) || (strncmp(pNext1->data, "ALD", 1) == 0)) || ((strncmp(pNext->data, "OLD", 1) == 0) || (strncmp(pNext->data, "ALD", 1) == 0))))
+            if ((CheckBigBranch == 1) && (((strncmp(pMain->data, "OLD", 1) == 0) || (strncmp(pMain->data, "ALD", 1) == 0)) || ((strncmp(pNext->data, "OLD", 1) == 0) || (strncmp(pNext->data, "ALD", 1) == 0))))
             {
                 OutString = AddParenthesesIfMissing(OutString);
                 OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
@@ -704,6 +810,7 @@ void FinalTextFile(void)
             OutString = StrAllocAndAppend("!", OutString);
             OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
             pMain = pMain->next;
+            ;
             if (strncmp(pMain->data, ")", 1) == 0)
             {
                 OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
@@ -717,6 +824,12 @@ void FinalTextFile(void)
                 pMain = pMain->next;
                 continue;
             }
+            if (strncmp(pMain->data, "not", 1) == 0)
+            {
+                OutString = StrAllocAndAppend(OutString, InsertQuestionMark);
+                CountQuestionMark++;
+            }
+
             if (((strcmp(pMain->data, "ALD") == 0) || (strcmp(pMain->data, "OLD") == 0)) && CheckBigBranch == 1)
             {
                 OutString = AddParenthesesIfMissing(OutString);
@@ -735,7 +848,7 @@ void FinalTextFile(void)
             OutString = StrAllocAndAppend(pMain->data, OutString);
             pMain = pMain->next;
             OutString = StrAllocAndAppend(pMain->data, OutString);
-            OutCheckBigBranch = "" ;
+            OutCheckBigBranch = "";
             fputs(OutString, pFile);
         }
         else if (strcmp(pMain->data, "CTU") == 0)
@@ -748,9 +861,7 @@ void FinalTextFile(void)
                 OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
                 OutCheckBigBranch = "";
             }
-            SetupCounterUpOrDown(&pMain,OutString,"_CTU =",pFile);
-
-
+            SetupCounterUpOrDown(&pMain, OutString, "_CTU =", pFile);
         }
         else if (strcmp(pMain->data, "CTD") == 0)
         {
@@ -762,8 +873,7 @@ void FinalTextFile(void)
                 OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
                 OutCheckBigBranch = "";
             }
-            SetupCounterUpOrDown(&pMain,OutString,"_CTD =",pFile);
-
+            SetupCounterUpOrDown(&pMain, OutString, "_CTD =", pFile);
         }
         else if (strcmp(pMain->data, "CTUD") == 0)
         {
@@ -775,8 +885,7 @@ void FinalTextFile(void)
                 OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
                 OutCheckBigBranch = "";
             }
-            SetupCounterUpDown(&pMain ,OutString,pFile);
-
+            SetupCounterUpDown(&pMain, OutString, pFile);
         }
         else if (strcmp(pMain->data, "TON") == 0)
         {
@@ -789,7 +898,7 @@ void FinalTextFile(void)
                 OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
                 OutCheckBigBranch = "";
             }
-            SetupTimer(&pMain,OutString, "_ON = ");
+            SetupTimer(&pMain, &OutString, "_ON = ");
             fputs(OutString, pFile);
         }
         else if (strcmp(pMain->data, "TOF") == 0)
@@ -802,7 +911,7 @@ void FinalTextFile(void)
                 OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
                 OutCheckBigBranch = "";
             }
-            SetupTimer(&pMain, OutString, "_OF = ");
+            SetupTimer(&pMain, &OutString, "_OF = ");
             fputs(OutString, pFile);
         }
         else if (strcmp(pMain->data, "TONR") == 0)
@@ -815,10 +924,73 @@ void FinalTextFile(void)
                 OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
                 OutCheckBigBranch = "";
             }
-            SetupTimer(&pMain, OutString, "_ONR = ");
+            SetupTimer(&pMain, &OutString, "_ONR = ");
             fputs(OutString, pFile);
         }
+        else if (strcmp(pMain->data, "MOVB") == 0)
+        {
+            InsertMov(&pMain, OutString, CountQuestionMark, pFile, MOVB_CHECK);
+            continue;
+        }
+        else if (strcmp(pMain->data, "MOVW") == 0)
+        {
+            InsertMov(&pMain, OutString, CountQuestionMark, pFile, MOVW_CHECK);
+            continue;
+        }
+        else if (strcmp(pMain->data, "MOVDW") == 0)
+        {
+            InsertMov(&pMain, OutString, CountQuestionMark, pFile, MOVDW_CHECK);
+            continue;
+        }
+
         pMain = pMain->next;
     }
+    fprintf(pFile, "\n}\n");
+}
+
+void FileDefineData(void)
+{
+    FILE *pFile = NULL;
+    pFile = fopen("DataPLCh.txt", "w");
+    // ghi tên file vào để tránh trùng lặp ở file khác
+    if (!pFile)
+        printf("Create file DataPLC.h failed \n");
+    fprintf(pFile, "#ifndef INC_CSDL_H_\n#define INC_CSDL_H_\n");
+
+    fprintf(pFile, "\n#include\"main.h\"\n");
+
+    DefineRegionMemory(pFile, I_MEM, SUM_I);
+
+    DefineRegionMemory(pFile, Q_MEM, SUM_Q);
+
+    DefineRegionMemory(pFile, M_MEM, SUM_M);
+
+    DefineIO(pFile, I_MEM, 2);
+
+    DefineIO(pFile, Q_MEM, 2);
+
+    fprintf(pFile, "\nvoid read_Pin_Input(void);\n");
+    fprintf(pFile, "void write_Pin_Output(void);\n");
+    fprintf(pFile, "void Main_task(void *param) ;\n");
+
+    fprintf(pFile, "\n#endif /*INC_CSDL_H_*/");
+
     fclose(pFile);
+}
+
+void FileData(FILE *pFile)
+{
+    pFile = fopen("DataPLCc.txt", "w");
+    if (!pFile)
+        printf("Create file  DataPLC.c failed \n");
+    fprintf(pFile, "#include\"DataPLC.h\"\n\n");
+
+    fprintf(pFile, "static uint8_t I[2][8]={};\nstatic uint8_t Q[2][8]={};\nstatic uint8_t M[10][2]={};\n");
+
+    fprintf(pFile, "\nvoid read_Pin_Input()\n");
+    readInputPin(pFile, SUM_I);
+
+    fprintf(pFile, "void write_Pin_Output()\n");
+    writeOutputPin(pFile, SUM_Q);
+    fprintf(pFile, "void Main_task( void *param)\n");
 }
