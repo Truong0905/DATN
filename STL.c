@@ -314,20 +314,26 @@ void AddPlusToOutString(LinkList *(*pMain), char *(*OutString), int *CountQuesti
     *pMain = (*pMain)->next;
 }
 
-void SetupTimer(LinkList *(*pMain), char *(*OutString), char *NameTimer)
+void SetupTimer(LinkList *(*pMain), char *(*OutString), char *NameTimer, FILE *pFileTimer,int CountTimer)
 {
     char *temparray = "";
+    char *buffer="" ;
+     buffer = StrAllocAndAppend(buffer, (*pMain)->data);
     *pMain = (*pMain)->next;
+     buffer = StrAllocAndAppend(buffer, (*pMain)->data);
+    H_InsertFunction(buffer) ;
     (*pMain)->data = StrAllocAndAppend((*pMain)->data, NameTimer);
     temparray = StrAllocAndAppend(temparray, (*pMain)->data);
     (*pMain)->data = StrAllocAndAppend("vao", (*pMain)->data);
     *OutString = StrAllocAndAppend(*OutString, " ;\n");
     *OutString = StrAllocAndAppend((*pMain)->data, *OutString);
     *pMain = (*pMain)->next;
+    fprintf(pFileTimer," handle_timer[%d] =  xTimerCreate(\"timer%s\", pdMS_TO_TICKS(%s),pdTRUE,(void *)(%d+1),%s) ;\n",CountTimer,NameTimer,(*pMain)->next,CountTimer,buffer);
     temparray = StrAllocAndAppend("dat", temparray);
     temparray = StrAllocAndAppend(temparray, (*pMain)->data);
     *OutString = StrAllocAndAppend(*OutString, temparray);
     *OutString = StrAllocAndAppend(*OutString, " ;\n");
+   
 }
 void SetupCounterUpOrDown(LinkList *(*pMain), char *OutString, char *NameCounter, FILE *pFile)
 {
