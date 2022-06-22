@@ -2,11 +2,14 @@
 
 LinkList *First, *Last, *FirstFinal, *LastFinal; // First và Last dùng cho  TransferToList ()   ; FirstFinal , LastFinal  là chuỗi cuối cùng cần tìm
 
+
+
 stringHashTable SaveIO[PrimeNumber];
-FILE *pFileTimer = NULL ;
-int CountTimer = 0 ;
+FILE *pFileTimer = NULL;
+int CountTimer = 0;
 int main(void)
 {
+
     FILE *pMainFile = NULL;
     LinkList *pTest;
     int row = 0;
@@ -26,7 +29,7 @@ int main(void)
     FileData(pMainFile);
     FinalTextFile(pMainFile); // Tạo file PLC_F.txt
     fclose(pMainFile);        // Đóng file PLC_F.txt
-     for (int i = 0; i < PrimeNumber; i++)
+    for (int i = 0; i < PrimeNumber; i++)
     {
         if (strcmp(SaveIO[i], "vacant") != 0 && (strcmp(SaveIO[i], "delete") != 0))
             printf("%d .  %s  \n", i, SaveIO[i]);
@@ -94,8 +97,6 @@ void InitSaveDataIO(void)
     //         H_InsertFunction(temp);
     //     }
     // }
-
-
 }
 
 FILE *ReadTextFile(int *RowOfFile)
@@ -489,8 +490,8 @@ void FinalTextFile(FILE *pFile)
     char *OutString;
     char *InsertOpeningBracket = "(";
     char *InsertClosingBracket = ")";
-    char *InsertMul = "&";
-    char *Insertplus = "|";
+    char *InsertMul = "*";
+    char *Insertplus = "+";
     char *InsertQuestionMark = "?";
     int CheckEndNetWork = 0; // Kiểm tra xem hết 1 network chưa
     int CheckBigBranch = 0;
@@ -498,7 +499,7 @@ void FinalTextFile(FILE *pFile)
     int CountQuestionMark = 0;    // Đếm số dấu "?"
     pMain = FirstFinal;
     int CountNetWork = 0;
-    int checkTimer = 1 ;
+    int checkTimer = 1;
 
     while (pMain != NULL)
     {
@@ -851,6 +852,7 @@ void FinalTextFile(FILE *pFile)
             OutString = StrAllocAndAppend(pMain->data, OutString);
             OutCheckBigBranch = "";
             fputs(OutString, pFile);
+            fprintf(pFile,"if (%s>0)\n{\n%s = 1;\n}\nelse\n{\n%s = 0 ;\n}\n",pMain->data,pMain->data,pMain->data);
         }
         else if (strcmp(pMain->data, "CTU") == 0)
         {
@@ -890,12 +892,12 @@ void FinalTextFile(FILE *pFile)
         }
         else if (strcmp(pMain->data, "TON") == 0)
         {
-            if ( checkTimer == 1 )
+            if (checkTimer == 1)
             {
-                pFileTimer = fopen("Timer.txt","w");
+                pFileTimer = fopen("Timer.txt", "w");
                 fprintf(pFileTimer, "void initTimer(void)\n");
                 fprintf(pFileTimer, "{\n");
-                checkTimer = 0 ;
+                checkTimer = 0;
             }
             OutString = AddParenthesesIfMissing(OutString);
 
@@ -906,18 +908,45 @@ void FinalTextFile(FILE *pFile)
                 OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
                 OutCheckBigBranch = "";
             }
-            SetupTimer(&pMain, &OutString, "_ON = ",pFileTimer,CountTimer);
-            CountTimer++ ;
+            InsertTimer(pMain,&CountTimer,pFileTimer);
+                // main -> data : TON
+            char *equal = " = " ;
+            char *temparray = ""; 
+            char *temparray1 = ""; 
+            pMain = pMain->next; // T97
+            temparray = StrAllocAndAppend(temparray, pMain->data);// T97
+            temparray1 = StrAllocAndAppend(temparray1, pMain->data);// T97
+            pMain->data = StrAllocAndAppend("int vao", pMain->data); // int vaoT97
+            pMain->data =  StrAllocAndAppend(pMain->data,equal) ;// int vaoT97 = 
+            OutString = StrAllocAndAppend(OutString, " ;\n");  // (I0_1&I0_1) ;\n 
+            OutString = StrAllocAndAppend(pMain->data, OutString);// int vaoT97 = (I0_1&I0_1) ;\n 
+            pMain = pMain->next; // 20
+            temparray = StrAllocAndAppend("const int dat", temparray); // int datT97
+            temparray =  StrAllocAndAppend(temparray,equal) ;// int datT97 =
+            temparray = StrAllocAndAppend(temparray, pMain->data); // int datT97 = 20
+            OutString = StrAllocAndAppend(OutString, temparray);// int vaoT97_ON = (I0_1&I0_1) ;\n int datT97_ON = 20
+            OutString = StrAllocAndAppend(OutString, " ;\n");
             fputs(OutString, pFile);
+            fprintf(pFile,"static int check%s = 0 ; \n ",temparray1) ;
+            fprintf(pFile, "if ( vao%s  )\n{\n",temparray1) ;
+            fprintf(pFile,"if ( count%s >= dat%s  ) \n%s = 1 ;\n",temparray1,temparray1,temparray1);
+            fprintf(pFile," \nif (%s == 0 )\n{\n",temparray1);
+            fprintf(pFile,"xTimerStart (handle_timer[%d], portMAX_DELAY);\n",CountTimer-1);
+            fprintf(pFile,"check%s = 0;\n}\n}\n",temparray1);
+            fprintf(pFile,"else \n");
+            fprintf(pFile,"{\nif( checkvao%s = 0 )\n{\n",temparray1);
+            fprintf(pFile,"xTimerStop(handle_timer[%d], portMAX_DELAY);\n",CountTimer -1);
+            fprintf(pFile,"check%s = 1 ;\n}\n%s=0;\ncount%s = 0 ;\n}\n",temparray1,temparray1,temparray1) ;
+
         }
         else if (strcmp(pMain->data, "TOF") == 0)
         {
-            if ( checkTimer == 1 )
+            if (checkTimer == 1)
             {
-                pFileTimer = fopen("Timer.txt","w");
+                pFileTimer = fopen("Timer.txt", "w");
                 fprintf(pFileTimer, "void initTimer(void)\n");
                 fprintf(pFileTimer, "{\n");
-                checkTimer = 0 ;
+                checkTimer = 0;
             }
             OutString = AddParenthesesIfMissing(OutString);
             CheckBigBranch = 0;
@@ -927,18 +956,38 @@ void FinalTextFile(FILE *pFile)
                 OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
                 OutCheckBigBranch = "";
             }
-            SetupTimer(&pMain, &OutString, "_OF = ",pFileTimer,CountTimer);
-            CountTimer ++ ;
+            InsertTimer(pMain,&CountTimer,pFileTimer);
+            char *equal = " = " ;
+            char *temparray = ""; 
+            char *temparray1 = ""; 
+            pMain = pMain->next; // T97
+            temparray = StrAllocAndAppend(temparray, pMain->data);// T97
+            temparray1 = StrAllocAndAppend(temparray1, pMain->data);// T97
+            pMain->data = StrAllocAndAppend("int vao", pMain->data); // int vaoT97
+            pMain->data =  StrAllocAndAppend(pMain->data,equal) ;// int vaoT97 = 
+            OutString = StrAllocAndAppend(OutString, " ;\n");  // (I0_1&I0_1) ;\n 
+            OutString = StrAllocAndAppend(pMain->data, OutString);// int vaoT97 = (I0_1&I0_1) ;\n 
+            pMain = pMain->next; // 20
+            temparray = StrAllocAndAppend("const int dat", temparray); // int datT97
+            temparray =  StrAllocAndAppend(temparray,equal) ;// int datT97 =
+            temparray = StrAllocAndAppend(temparray, pMain->data); // int datT97 = 20
+            OutString = StrAllocAndAppend(OutString, temparray);// int vaoT97_ON = (I0_1&I0_1) ;\n int datT97_ON = 20
+            OutString = StrAllocAndAppend(OutString, " ;\n");
             fputs(OutString, pFile);
+            fprintf(pFile,"static int check%sOn  = 0 ;\nstatic int check%sOff  = 0 ;\n static int start%s = 1 ;\n ",temparray1,temparray1, temparray1) ;
+            fprintf(pFile, "if ( vao%s  )\n{\ncount%s = 0 ;\ncheck%sOn = 1 ;\n%s =1 ;\n if ( check%sOff == 1 ||  start%s == 1 )\n{\n",temparray1,temparray1,temparray1,temparray1,temparray1,temparray1) ;
+            fprintf(pFile,"xTimerStop(handle_timer[%d], portMAX_DELAY);\ncheck%sOff = 0 ;\nstart%s ==0 \n }\n}\n" , CountTimer-1,temparray1,temparray1);
+            fprintf(pFile," else \n{\ncheck%sOff = 1 ;\nif ( check%sOn == 1 )\n{ \n",temparray1,temparray1);
+            fprintf(pFile,"xTimerStart (handle_timer[%d], portMAX_DELAY); \ncheck%sOn = 0  ; \n}\nif ( count%s >= dat%s ) \n{\n%s = 0 ;\n}\n}\n",CountTimer-1 ,temparray1,temparray1,temparray1,temparray1);
         }
         else if (strcmp(pMain->data, "TONR") == 0)
         {
-            if ( checkTimer == 1 )
+            if (checkTimer == 1)
             {
-                pFileTimer = fopen("Timer.txt","w");
+                pFileTimer = fopen("Timer.txt", "w");
                 fprintf(pFileTimer, "void initTimer(void)\n");
                 fprintf(pFileTimer, "{\n");
-                checkTimer = 0 ;
+                checkTimer = 0;
             }
             OutString = AddParenthesesIfMissing(OutString);
             CheckBigBranch = 0;
@@ -948,9 +997,30 @@ void FinalTextFile(FILE *pFile)
                 OutString = StrAllocAndAppend(OutCheckBigBranch, OutString);
                 OutCheckBigBranch = "";
             }
-            SetupTimer(&pMain, &OutString, "_ONR = ",pFileTimer,CountTimer);
-            CountTimer++ ;
-            fputs(OutString, pFile);
+             InsertTimer(pMain,&CountTimer,pFileTimer);
+            char *equal = " = " ;
+            char *temparray = ""; 
+            char *temparray1 = ""; 
+            pMain = pMain->next; // T97
+            temparray = StrAllocAndAppend(temparray, pMain->data);// T97
+            temparray1 = StrAllocAndAppend(temparray1, pMain->data);// T97
+            pMain->data = StrAllocAndAppend("int vao", pMain->data); // int vaoT97
+            pMain->data =  StrAllocAndAppend(pMain->data,equal) ;// int vaoT97 = 
+            OutString = StrAllocAndAppend(OutString, " ;\n");  // (I0_1&I0_1) ;\n 
+            OutString = StrAllocAndAppend(pMain->data, OutString);// int vaoT97 = (I0_1&I0_1) ;\n 
+            pMain = pMain->next; // 20
+            temparray = StrAllocAndAppend("const int dat", temparray); // int datT97
+            temparray =  StrAllocAndAppend(temparray,equal) ;// int datT97 =
+            temparray = StrAllocAndAppend(temparray, pMain->data); // int datT97 = 20
+            OutString = StrAllocAndAppend(OutString, temparray);// int vaoT97_ON = (I0_1&I0_1) ;\n int datT97_ON = 20
+            OutString = StrAllocAndAppend(OutString, " ;\n");
+            fputs(OutString, pFile); 
+            fprintf(pFile,"static int  check%sOn = 0 ;\nstatic int check%sOff = 0 ;\nstatic checkCount%s = 0 ;\nstatic int start%s = 0 ;\n",temparray1,temparray1,temparray1,temparray1);
+            fprintf(pFile,"if ( vao%s ) \n{\ncheck%sOn = 1 ;\nif ( check%sOff == 1 || start%s == 1 )\n",temparray1,temparray1,temparray1,temparray1);
+            fprintf(pFile,"{ \nxTimerStart (handle_timer[%d], portMAX_DELAY); \ncheck%sOff = 0 ; \nstart%s = 0 ;\n}\n",CountTimer-1 ,temparray1,temparray1);
+            fprintf(pFile,"if ( (count%s-checkCount%s) >= dat%s) \n{%s = 1 ;\ncheckCount%s = 0 ;\ncount%s = 0 ;\nxTimerStop(handle_timer[%d], portMAX_DELAY);\n}\n}\n",temparray1,temparray1,temparray1,temparray1,temparray1,temparray1,CountTimer-1);
+            fprintf(pFile,"else\n{check%sOff = 1 ;\nif( (!count%s) && (check%sOn == 1 )  )\ncheckCount%s = count%s ;\ncheck%sOn = 0 ;\n}\n",temparray1,temparray1,temparray1,temparray1,temparray1,temparray1);
+
         }
         else if (strcmp(pMain->data, "MOVB") == 0)
         {
@@ -971,6 +1041,8 @@ void FinalTextFile(FILE *pFile)
         pMain = pMain->next;
     }
     fprintf(pFile, "\n}\n");
+    fprintf(pFileTimer, "\n}\n");
+    fclose(pFileTimer);
 }
 
 void FileDefineData(void)
