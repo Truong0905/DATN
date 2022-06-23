@@ -897,7 +897,7 @@ void FinalTextFile(FILE *pFile)
             pPrev = pMain->prev ; // c2
             fprintf(pFile,"static uint32_t nho%s = dat%s ;\nstatic uint8_t start%s = 1 ;\nstatic uint8_t check%s = 0 ;\n",pPrev->data,pPrev->data,pPrev->data,pPrev->data);
             fprintf(pFile,"if (reset%s)\n{\nnho%s = dat%s ;\ncount%s = dat%s ;\n%s = 0 ;\n}\n",pPrev->data,pPrev->data,pPrev->data,pPrev->data,pPrev->data,pPrev->data);
-            fprintf(pFile,"else \n{\nif (vao%s\n{\n",pPrev->data);
+            fprintf(pFile,"else \n{\nif (vao%s)\n{\n",pPrev->data);
             fprintf(pFile,"if ( ( (checkC2 ==1 ) || ( start%s ==1 ))  && ( nho%s > 0 ))\n{\nnho%s --  ;\ncount%s = nho%s ;\nstart%s == 0 ;\n}\n ",pPrev->data,pPrev->data,pPrev->data,pPrev->data,pPrev->data,pPrev->data);
             fprintf(pFile,"if (count%s <= 0 )\n{\n%s = 1 ;\n}\n}\nelse \n{\ncheck%s = 1 ;\n}\n}\n",pPrev->data,pPrev->data,pPrev->data); 
         }
