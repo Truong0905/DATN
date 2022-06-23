@@ -314,45 +314,25 @@ void AddPlusToOutString(LinkList *(*pMain), char *(*OutString), int *CountQuesti
     *pMain = (*pMain)->next;
 }
 
-void SetupTimer(LinkList *(*pMain), char *(*OutString), char *NameTimer, FILE *pFileTimer,int CountTimer)
-{
-    char *temparray = "";
-    char *buffer="" ;
-     buffer = StrAllocAndAppend(buffer, (*pMain)->data);
-    *pMain = (*pMain)->next;
-     buffer = StrAllocAndAppend(buffer, (*pMain)->data);
-    H_InsertFunction(buffer) ;
-    (*pMain)->data = StrAllocAndAppend((*pMain)->data, NameTimer);
-    temparray = StrAllocAndAppend(temparray, (*pMain)->data);
-    (*pMain)->data = StrAllocAndAppend("vao", (*pMain)->data);
-    *OutString = StrAllocAndAppend(*OutString, " ;\n");
-    *OutString = StrAllocAndAppend((*pMain)->data, *OutString);
-    *pMain = (*pMain)->next;
-    fprintf(pFileTimer," handle_timer[%d] =  xTimerCreate(\"timer%s\", pdMS_TO_TICKS(%s),pdTRUE,(void *)(%d+1),%s) ;\n",CountTimer,NameTimer,(*pMain)->next,CountTimer,buffer);
-    temparray = StrAllocAndAppend("dat", temparray);
-    temparray = StrAllocAndAppend(temparray, (*pMain)->data);
-    *OutString = StrAllocAndAppend(*OutString, temparray);
-    *OutString = StrAllocAndAppend(*OutString, " ;\n");
-   
-}
-void SetupCounterUpOrDown(LinkList *(*pMain), char *OutString, char *NameCounter, FILE *pFile)
+void SetupCounterUpOrDown(LinkList *(*pMain), char *OutString, FILE *pFile)
 {
     char *TempArry = "";
-    char *token = strtok(OutString, "?");
-    *pMain = (*pMain)->next;
-    TempArry = StrAllocAndAppend((*pMain)->data, NameCounter);
-    TempArry = StrAllocAndAppend("vao", TempArry);
+    char *equal = " = " ; 
+    char *token = strtok(OutString, "?"); // ( M0_1) < OutString , token >
+    *pMain = (*pMain)->next; // C1 
+    TempArry = StrAllocAndAppend((*pMain)->data, equal); // C1_CTU
+    TempArry = StrAllocAndAppend("uint8_t vao", TempArry);// vaoC1_CTU
     TempArry = StrAllocAndAppend(TempArry, token);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
     fputs(TempArry, pFile);
     token = strtok(NULL, "?");
-    TempArry = StrAllocAndAppend((*pMain)->data, NameCounter);
-    TempArry = StrAllocAndAppend("reset", TempArry);
+    TempArry = StrAllocAndAppend((*pMain)->data, equal);
+    TempArry = StrAllocAndAppend("uint8_t reset", TempArry);
     TempArry = StrAllocAndAppend(TempArry, token);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
     fputs(TempArry, pFile);
-    TempArry = StrAllocAndAppend((*pMain)->data, NameCounter);
-    TempArry = StrAllocAndAppend("dat", TempArry);
+    TempArry = StrAllocAndAppend((*pMain)->data, equal);
+    TempArry = StrAllocAndAppend("const uint32_t dat", TempArry);
     *pMain = (*pMain)->next;
     TempArry = StrAllocAndAppend(TempArry, (*pMain)->data);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
@@ -363,25 +343,25 @@ void SetupCounterUpDown(LinkList *(*pMain), char *OutString, FILE *pFile) // "_C
     char *TempArry = "";
     char *token = strtok(OutString, "?");
     *pMain = (*pMain)->next;
-    TempArry = StrAllocAndAppend((*pMain)->data, "_CTUD = ");
-    TempArry = StrAllocAndAppend("tang", TempArry);
+    TempArry = StrAllocAndAppend((*pMain)->data, " = ");
+    TempArry = StrAllocAndAppend("uint8_t tang", TempArry);
     TempArry = StrAllocAndAppend(TempArry, token);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
     fputs(TempArry, pFile);
     token = strtok(NULL, "?");
-    TempArry = StrAllocAndAppend((*pMain)->data, "_CTUD = ");
-    TempArry = StrAllocAndAppend("giam", TempArry);
+    TempArry = StrAllocAndAppend((*pMain)->data, " = ");
+    TempArry = StrAllocAndAppend("uint8_t giam", TempArry);
     TempArry = StrAllocAndAppend(TempArry, token);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
     fputs(TempArry, pFile);
     token = strtok(NULL, "?");
-    TempArry = StrAllocAndAppend((*pMain)->data, "_CTUD = ");
-    TempArry = StrAllocAndAppend("reset", TempArry);
+    TempArry = StrAllocAndAppend((*pMain)->data, " = ");
+    TempArry = StrAllocAndAppend("uint8_t reset", TempArry);
     TempArry = StrAllocAndAppend(TempArry, token);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
     fputs(TempArry, pFile);
-    TempArry = StrAllocAndAppend((*pMain)->data, "_CTUD = ");
-    TempArry = StrAllocAndAppend("dat", TempArry);
+    TempArry = StrAllocAndAppend((*pMain)->data, " = ");
+    TempArry = StrAllocAndAppend("const uint32_t  dat", TempArry);
     *pMain = (*pMain)->next;
     TempArry = StrAllocAndAppend(TempArry, (*pMain)->data);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
@@ -550,7 +530,7 @@ void InsertMov(LinkList *(*pMain), char *OutString, int CountQuestionMark, FILE 
             InsertString = AddParenthesesIfMissing(InsertString);
             // printf("\n%s\n", InsertString);
             fprintf(pFile, "if(%s)\n ", InsertString);
-            fprintf(pFile, " (memcpy(&%s,&%s,%d)) ;\n", temp->data, (*pMain)->data,check);
+            fprintf(pFile, " (memcpy(&%s,&%s,%d)) ;\n", temp->data, (*pMain)->data, check);
             DeleteLinkList(&(*pMain), &((*pMain)->prev), &((*pMain)->next));
             DeleteLinkList(&temp, &(temp->prev), &(temp->next));
             (*pMain) = pNext->next;
@@ -573,5 +553,81 @@ void InsertMov(LinkList *(*pMain), char *OutString, int CountQuestionMark, FILE 
         fprintf(pFile, "if(%s)\n ", OutString);
         fprintf(pFile, " (memcpy(&%s,&%s,1)) ; \n", temp->data, (*pMain)->data);
     }
+}
+
+int getNumber(char *p, int len) // Đọc số từ chuỗi  vd : "97" -> (int) 97
+{
+    int value;
+    if (len = 2)
+    {
+        value = (((p[0] - 48) * 10) + (p[1] - 48));
+    }
+    else if (len == 1)
+    {
+        value = p[0] - 48;
+    }
+    else
+    {
+        value = (((p[0] - 48) * 100) + (p[1] - 48) * 10 + (p[2] - 48));
+    }
+
+    return value;
+}
+
+void InsertTimer(LinkList *pMain, int *CountTimer, FILE *pFileTimer)
+{
+    LinkList *pNext;
+    char *buffer = "";
+    char *temp = "";
+    char *token;
+    buffer = StrAllocAndAppend(buffer, pMain->data); // TON
+    pNext = pMain->next;
+    buffer = StrAllocAndAppend(buffer, pNext->data); // T97
+    temp = StrAllocAndAppend(temp, pNext->data);     // T97
+    token = strtok(temp, "T");
+    int k = getNumber(token, strlen(token));
+    int b;
+    /*
+        1ms
+            // TON , TOFF
+            T32 ,T96
+            // TONR
+            T0 , T64
+        10ms
+            // TON , TOFF
+            T97 - T99
+            T100
+            T33-T36
+            // TONR
+            //
+            T1-4 ,T65-68
+
+        100ms
+            // TON , TOFF
+            T37-T63
+            T101-T255
+            // TONR
+            T5-T31
+            T69-T95
+     */
+    if ((k == 32) || (k == 96) || (k == 0) || (k == 64))
+    {
+        b = 1;
+    }
+    else if ((k == 100) || (97 <= k <= 99) || (33 <= k <= 36) || (1 <= k <= 4) || (65 <= k <= 68))
+    {
+        b = 10;
+    }
+    else
+    {
+        b = 100;
+    }
+
+    pNext = pNext->next; // 20
+                         // fprintf(pFileTimer, " handle_timer[%d] =  xTimerCreate(\"timer%s\", pdMS_TO_TICKS(%s*%d),pdFALSE,(void *)(%d+1),%s) ;\n", *CountTimer, buffer, pNext->data, b, *CountTimer, buffer);
+    fprintf(pFileTimer, " handle_timer[%d] =  xTimerCreate(\"timer%s\", pdMS_TO_TICKS(%d),pdTRUE,(void *)(%d+1),TimerCallBack) ;\n", *CountTimer, buffer, b, *CountTimer);
+    sprintf(buffer, "%s_%d", buffer, *CountTimer);
+    H_InsertFunction(buffer);
+    (*CountTimer)++;
 }
 
