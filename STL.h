@@ -31,7 +31,7 @@ char *StrAllocAndAppend(const char *str1, const char *str2);
 
 //-----------------------------------FinalList--And---SplitBranchesWithFirstFinalPointer-------------------------------------------------------------------------------------------//
 
-void InsertEdge(LinkList *pMainOfFirstFinal, const char * const edge);
+void InsertEdge(LinkList *pMainOfFirstFinal, const char *const edge);
 void CreateTheFirstPointerOfList(LinkList *(*pMain), LinkList *(*F), LinkList *(*L));
 void CreateTheElementOfList(LinkList *(*pMain), LinkList *(*L));
 void CreateTheElementOfList(LinkList *(*pMain), LinkList *(*L));
@@ -47,17 +47,16 @@ char *AddParenthesesIfMissing(char *arr);
 void CheckCountQuestionMark(int *CountQuestionMark, int *CheckBigBranch, char *(*OutString), char *(*OutCheckBigBranch));
 void CheckNOT(LinkList *(*pMain), LinkList *pNext, LinkList *pNext1, char *(*OutString), char *Insert);
 void AddPlusToOutString(LinkList *(*pMain), char *(*OutString), int *CountQuestionMark, char *Insert);
-void SetupTimer(LinkList *(*pMain), char *(*OutString), char *NameTimer,FILE *pFileTimer,int CountTimer);
-void SetupCounterUpOrDown(LinkList *(*pMain), char *OutString, char *NameCounter, FILE *pFile);
+void InsertTimer(LinkList *pMain, int *CountTimer, FILE *pFileTimer);
+void SetupCounterUpOrDown(LinkList *(*pMain), char *OutString,FILE *pFile);
 void SetupCounterUpDown(LinkList *(*pMain), char *OutString, FILE *pFile);
-char *CheckQuestionMask (int CountQuestionMark,char *OutString) ;
-void DeleteLinkList( LinkList *(*pMain), LinkList *(*pPREV),LinkList *(*pNEXT)) ;
-void InsertMov( LinkList *(*pMain) , char * OutString , int CountQuestionMark , FILE *pFile ,int checkMov) ;
-
+char *CheckQuestionMask(int CountQuestionMark, char *OutString);
+void DeleteLinkList(LinkList *(*pMain), LinkList *(*pPREV), LinkList *(*pNEXT));
+void InsertMov(LinkList *(*pMain), char *OutString, int CountQuestionMark, FILE *pFile, int checkMov);
+int getNumber(char *p, int len);
 #define MOVB_CHECK 0
 #define MOVW_CHECK 1
 #define MOVDW_CHECK 2
-
 
 //------------------------------------------------- define memory region --------------------------------------------
 // Lựa chọn vùng nhớ
