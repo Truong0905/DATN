@@ -321,18 +321,18 @@ void SetupCounterUpOrDown(LinkList *(*pMain), char *OutString, FILE *pFile)
     char *token = strtok(OutString, "?"); // ( M0_1) < OutString , token >
     *pMain = (*pMain)->next; // C1 
     TempArry = StrAllocAndAppend((*pMain)->data, equal); // C1_CTU
-    TempArry = StrAllocAndAppend("uint8_t vao", TempArry);// vaoC1_CTU
+    TempArry = StrAllocAndAppend("vao", TempArry);// vaoC1_CTU
     TempArry = StrAllocAndAppend(TempArry, token);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
     fputs(TempArry, pFile);
     token = strtok(NULL, "?");
     TempArry = StrAllocAndAppend((*pMain)->data, equal);
-    TempArry = StrAllocAndAppend("uint8_t reset", TempArry);
+    TempArry = StrAllocAndAppend("reset", TempArry);
     TempArry = StrAllocAndAppend(TempArry, token);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
     fputs(TempArry, pFile);
     TempArry = StrAllocAndAppend((*pMain)->data, equal);
-    TempArry = StrAllocAndAppend("const uint32_t dat", TempArry);
+    TempArry = StrAllocAndAppend("dat", TempArry);
     *pMain = (*pMain)->next;
     TempArry = StrAllocAndAppend(TempArry, (*pMain)->data);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
@@ -344,24 +344,24 @@ void SetupCounterUpDown(LinkList *(*pMain), char *OutString, FILE *pFile) // "_C
     char *token = strtok(OutString, "?");
     *pMain = (*pMain)->next;
     TempArry = StrAllocAndAppend((*pMain)->data, " = ");
-    TempArry = StrAllocAndAppend("uint8_t tang", TempArry);
+    TempArry = StrAllocAndAppend("tang", TempArry);
     TempArry = StrAllocAndAppend(TempArry, token);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
     fputs(TempArry, pFile);
     token = strtok(NULL, "?");
     TempArry = StrAllocAndAppend((*pMain)->data, " = ");
-    TempArry = StrAllocAndAppend("uint8_t giam", TempArry);
+    TempArry = StrAllocAndAppend(" giam", TempArry);
     TempArry = StrAllocAndAppend(TempArry, token);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
     fputs(TempArry, pFile);
     token = strtok(NULL, "?");
     TempArry = StrAllocAndAppend((*pMain)->data, " = ");
-    TempArry = StrAllocAndAppend("uint8_t reset", TempArry);
+    TempArry = StrAllocAndAppend(" reset", TempArry);
     TempArry = StrAllocAndAppend(TempArry, token);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
     fputs(TempArry, pFile);
     TempArry = StrAllocAndAppend((*pMain)->data, " = ");
-    TempArry = StrAllocAndAppend("const uint32_t  dat", TempArry);
+    TempArry = StrAllocAndAppend(" dat", TempArry);
     *pMain = (*pMain)->next;
     TempArry = StrAllocAndAppend(TempArry, (*pMain)->data);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
@@ -543,8 +543,8 @@ void InsertMov(LinkList *(*pMain), char *OutString, int CountQuestionMark, FILE 
             fprintf(pFile, " (memcpy(&%s,&%s,1)) ; \n", temp->data, (*pMain)->data);
             DeleteLinkList(&(*pMain), &((*pMain)->prev), &((*pMain)->next));
             DeleteLinkList(&temp, &(temp->prev), &(temp->next));
-            (*pMain) = pNext->next;
-            DeleteLinkList(&pNext, &(pNext->prev), &(pNext->next));
+            (*pMain) = pNext ;
+            // DeleteLinkList(&pNext, &(pNext->prev), &(pNext->next));
         }
     }
     else
