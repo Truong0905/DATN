@@ -331,12 +331,7 @@ void SetupCounterUpOrDown(LinkList *(*pMain), char *OutString, FILE *pFile)
     TempArry = StrAllocAndAppend(TempArry, token);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
     fputs(TempArry, pFile);
-    TempArry = StrAllocAndAppend((*pMain)->data, equal);
-    TempArry = StrAllocAndAppend("dat", TempArry);
     *pMain = (*pMain)->next;
-    TempArry = StrAllocAndAppend(TempArry, (*pMain)->data);
-    TempArry = StrAllocAndAppend(TempArry, " ;\n");
-    fputs(TempArry, pFile);
 }
 void SetupCounterUpDown(LinkList *(*pMain), char *OutString, FILE *pFile) // "_CTU ="
 {
@@ -360,12 +355,7 @@ void SetupCounterUpDown(LinkList *(*pMain), char *OutString, FILE *pFile) // "_C
     TempArry = StrAllocAndAppend(TempArry, token);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
     fputs(TempArry, pFile);
-    TempArry = StrAllocAndAppend((*pMain)->data, " = ");
-    TempArry = StrAllocAndAppend(" dat", TempArry);
     *pMain = (*pMain)->next;
-    TempArry = StrAllocAndAppend(TempArry, (*pMain)->data);
-    TempArry = StrAllocAndAppend(TempArry, " ;\n");
-    fputs(TempArry, pFile);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -472,7 +462,7 @@ void readInputPin(FILE *pFile, int sumOfmem)
             compare = buffer;
             int Search = H_FindFunction(compare);
             if (Search >= 0)
-                fprintf(pFile, "%s = !HAL_GPIO_ReadPin(%s_PORT, %s_PIN);\n", SaveIO[Search], SaveIO[Search], SaveIO[Search]);
+                fprintf(pFile, "%s = HAL_GPIO_ReadPin(%s_PORT, %s_PIN);\n", SaveIO[Search], SaveIO[Search], SaveIO[Search]);
         }
     }
     fprintf(pFile, "}\n");
@@ -614,7 +604,7 @@ void InsertTimer(LinkList *pMain, int *CountTimer, FILE *pFileTimer)
     {
         b = 1;
     }
-    else if ((k == 100) || (97 <= k <= 99) || (33 <= k <= 36) || (1 <= k <= 4) || (65 <= k <= 68))
+    else if ((k == 100) || ((97 <= k) && (k<= 99)) || ((33 <= k) && (k<= 36)) || ((1 <= k)&& (k<= 4)) || ((65 <= k) && (k<= 68)))
     {
         b = 10;
     }
@@ -625,8 +615,8 @@ void InsertTimer(LinkList *pMain, int *CountTimer, FILE *pFileTimer)
 
     pNext = pNext->next; // 20
                          // fprintf(pFileTimer, " handle_timer[%d] =  xTimerCreate(\"timer%s\", pdMS_TO_TICKS(%s*%d),pdFALSE,(void *)(%d+1),%s) ;\n", *CountTimer, buffer, pNext->data, b, *CountTimer, buffer);
-    fprintf(pFileTimer, " handle_timer[%d] =  xTimerCreate(\"timer%s\", pdMS_TO_TICKS(%d),pdTRUE,(void *)(%d+1),TimerCallBack) ;\n", *CountTimer, buffer, b, *CountTimer);
-    sprintf(buffer, "%s_%d", buffer, *CountTimer);
+    fprintf(pFileTimer, " handle_timerPLC[%d] =  xTimerCreate(\"timer%s\", pdMS_TO_TICKS(%d),pdTRUE,(void *)(%d+1),TimerCallBack) ;\n", *CountTimer, buffer, b, *CountTimer);
+    sprintf(buffer, "%s_%d", buffer, *CountTimer+1);
     H_InsertFunction(buffer);
     (*CountTimer)++;
 }

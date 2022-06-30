@@ -69,8 +69,6 @@ int getNumber(char *p, int len);
 #define SUM_Q 2
 #define SUM_M 10
 
-// Chọn chu kỳ quét 
-#define SCANCYCLE ((int)5 ) // ms
 
 //----------------------------------------------------------------FileDefineData----------------------------------------
 void FileDefineData(void);

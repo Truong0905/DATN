@@ -7,7 +7,6 @@ FILE *pFileTimer = NULL;
 int CountTimer = 0;
 int main(void)
 {
-
     FILE *pMainFile = NULL;
     LinkList *pTest;
     int row = 0;
@@ -450,6 +449,7 @@ void FinalTextFile(FILE *pFile)
     LinkList *pMain, *pNext, *pNext1, *pPrev, *pPrev1;
     pFile = fopen("build/DataPLC.c", "a");
     fprintf(pFile, "while(1)\n{\n");
+     fprintf(pFile, "read_Pin_Input();\n");
     char *OutString;
     char *InsertOpeningBracket = "(";
     char *InsertClosingBracket = ")";
@@ -459,8 +459,8 @@ void FinalTextFile(FILE *pFile)
     int CheckEndNetWork = 0; // Kiểm tra xem hết 1 network chưa
     int CheckBigBranch = 0;
     char *OutCheckBigBranch = ""; // Kiểm tra xem có nhánh lớn trước đó không
-    char *OutStringLP = ""; 
-    int CountQuestionMark = 0;    // Đếm số dấu "?"
+    char *OutStringLP = "";
+    int CountQuestionMark = 0; // Đếm số dấu "?"
     pMain = FirstFinal;
     int CountNetWork = 0;
     int checkTimer = 1;
@@ -620,13 +620,17 @@ void FinalTextFile(FILE *pFile)
         {
             static int countEU = 0;
             char *temp = "";
+            char temp1[]="";
+            sprintf(temp1, "%d", countEU);
+           OutString = StrAllocAndAppend(OutString,temp1);
+            pNext->data = StrAllocAndAppend(pNext->data, temp1);
             temp = StrAllocAndAppend(temp, pNext->data); // I0_0sl
             char *tokenEU = strtok(temp, "s");           // I0_0
             fprintf(pFile, " volatile uint8_t %s = %s;\n", pNext->data, tokenEU);
             fprintf(pFile, "volatile static uint8_t checkEU%d = 0 ;\n", countEU);
             fprintf(pFile, "if ( !(%s) )\n{\n	checkEU%d = 0 ;\n}\n", tokenEU, countEU);
             fprintf(pFile, "if ( (!checkEU%d) && (%s) ) \n{\ncheckEU%d = 0 ; \n%s = 1 ;\n}\n", countEU, tokenEU, countEU, pNext->data);
-
+            countEU++;
             pMain = pMain->next;
             continue;
         }
@@ -634,13 +638,17 @@ void FinalTextFile(FILE *pFile)
         {
             static int countED = 0;
             char *temp = "";
+            char temp1[]="";
+            sprintf(temp1, "%d", countED);
+             OutString = StrAllocAndAppend(OutString,temp1);
+            pNext->data = StrAllocAndAppend(pNext->data, temp1);
             temp = StrAllocAndAppend(temp, pNext->data); // I0_0sl
             char *tokenED = strtok(temp, "s");           // I0_0
             fprintf(pFile, " volatile uint8_t %s = %s;\n", pNext->data, tokenED);
             fprintf(pFile, "volatile static uint8_t checkEU%d = 1 ;\n", countED);
             fprintf(pFile, "if (%s)\n{\n	checkEU%d = 0 ;\n}\n", tokenED, countED);
             fprintf(pFile, "if ( (!checkEU%d) && (!(%s)) ) \n{\ncheckEU%d = 0 ; \n%s = 1 ;\n}\n", countED, tokenED, countED, pNext->data);
-
+            countED++;
             pMain = pMain->next;
             continue;
         }
@@ -649,6 +657,11 @@ void FinalTextFile(FILE *pFile)
             pPrev = pMain->prev; // LinkList *pPREV_temp = pPrev;
             pNext = pMain->next;
             pNext1 = pNext->next;
+            pPrev1 = pPrev->prev;
+            if ((strcmp(pPrev1->data, "O") == 0) || (strcmp(pPrev1->data, "ON") == 0))
+            {
+                OutString = StrAllocAndAppend(OutString, InsertClosingBracket); // (I0+I1)*I2
+            }
             CheckNOT(&pMain, pNext, pNext1, &OutString, InsertMul);
 
             while ((strcmp(pMain->data, "A") == 0) || (strcmp(pMain->data, "AN") == 0))
@@ -699,6 +712,11 @@ void FinalTextFile(FILE *pFile)
             pPrev = pMain->prev;
             pNext = pMain->next;
             pNext1 = pNext->next;
+            pPrev1 = pPrev->prev;
+            if ((strcmp(pPrev1->data, "A") == 0) || (strcmp(pPrev1->data, "AN") == 0))
+            {
+                OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
+            }
             CheckNOT(&pMain, pNext, pNext1, &OutString, Insertplus);
             while ((strcmp(pMain->data, "O") == 0) || (strcmp(pMain->data, "ON") == 0))
             {
@@ -857,7 +875,7 @@ void FinalTextFile(FILE *pFile)
             fprintf(pFile, "if (reset%s) \n{\ncount%s = 0 ;\n%s = 0 ; \nstart%s = 1 ;\n}\n", pPrev->data, pPrev->data, pPrev->data, pPrev->data);
             fprintf(pFile, "else\n{\nif (vao%s)\n{\n ", pPrev->data);
             fprintf(pFile, "if ( ( (check%s ==1 ) || ( start%s ==1 ) ) && (count%s <= 4294967295)  )\n", pPrev->data, pPrev->data, pPrev->data);
-            fprintf(pFile, "{\ncount%s ++ ;\nstart%s == 0 ;\n}\nif (count%s >= dat%s )\n{%s =1 ;\n}\n}\n", pPrev->data, pPrev->data, pPrev->data, pPrev->data, pPrev->data);
+            fprintf(pFile, "{\ncount%s ++ ;\nstart%s = 0 ;\n}\nif (count%s >= dat%s )\n{%s =1 ;\n}\n}\n", pPrev->data, pPrev->data, pPrev->data, pPrev->data, pPrev->data);
             fprintf(pFile, "else \n{\n check%s = 1 ;\n}\n}\n", pPrev->data);
         }
         else if (strcmp(pMain->data, "CTD") == 0)
@@ -875,7 +893,7 @@ void FinalTextFile(FILE *pFile)
             pPrev = pMain->prev; // c2
             fprintf(pFile, "if (reset%s)\n{\nnho%s = dat%s ;\ncount%s = dat%s ;\n%s = 0 ;\n}\n", pPrev->data, pPrev->data, pPrev->data, pPrev->data, pPrev->data, pPrev->data);
             fprintf(pFile, "else \n{\nif (vao%s)\n{\n", pPrev->data);
-            fprintf(pFile, "if ( ( (checkC2 ==1 ) || ( start%s ==1 ))  && ( nho%s > 0 ))\n{\nnho%s --  ;\ncount%s = nho%s ;\nstart%s == 0 ;\n}\n ", pPrev->data, pPrev->data, pPrev->data, pPrev->data, pPrev->data, pPrev->data);
+            fprintf(pFile, "if ( ( (checkC2 ==1 ) || ( start%s ==1 ))  && ( nho%s > 0 ))\n{\nnho%s --  ;\ncount%s = nho%s ;\nstart%s = 0 ;\n}\n ", pPrev->data, pPrev->data, pPrev->data, pPrev->data, pPrev->data, pPrev->data);
             fprintf(pFile, "if (count%s <= 0 )\n{\n%s = 1 ;\n}\n}\nelse \n{\ncheck%s = 1 ;\n}\n}\n", pPrev->data, pPrev->data, pPrev->data);
         }
         else if (strcmp(pMain->data, "CTUD") == 0)
@@ -894,11 +912,11 @@ void FinalTextFile(FILE *pFile)
             fprintf(pFile, "if (reset%s)\n{\nnho%s = 0 ;\ncount%s = 0 ;\n%s = 0 ;\n}\n", pPrev->data, pPrev->data, pPrev->data, pPrev->data);
             fprintf(pFile, "else \n{\n\nif (tang%s)\n{\n", pPrev->data);
             fprintf(pFile, "if ( ( (check%stang ==1 ) || ( start%stang ==1 ))  && ( count%s <= 4294967295 ))\n ", pPrev->data);
-            fprintf(pFile, "{\nnho%s ++  ;\ncount%s = nho%s ;\nstart%stang == 0 ;\n}\n}\n", pPrev->data, pPrev->data, pPrev->data, pPrev->data);
+            fprintf(pFile, "{\nnho%s ++  ;\ncount%s = nho%s ;\nstart%stang = 0 ;\n}\n}\n", pPrev->data, pPrev->data, pPrev->data, pPrev->data);
             fprintf(pFile, "else \n{\ncheck%stang = 1 ;\n}\n", pPrev->data);
             fprintf(pFile, "if (giam%s)\n{\n", pPrev->data);
             fprintf(pFile, "if ( ( (check%sgiam ==1 ) || ( start%sgiam ==1 ))  && ( nho%s > 0 )) \n", pPrev->data, pPrev->data, pPrev->data);
-            fprintf(pFile, "{\nnho%s --  ;\ncount%s = nho%s ;\nstart%sgiam == 0 ;\n}\n}\n", pPrev->data, pPrev->data, pPrev->data, pPrev->data);
+            fprintf(pFile, "{\nnho%s --  ;\ncount%s = nho%s ;\nstart%sgiam = 0 ;\n}\n}\n", pPrev->data, pPrev->data, pPrev->data, pPrev->data);
             fprintf(pFile, "else\n{\ncheck%sgiam = 1 ;\n}\n ", pPrev->data);
             fprintf(pFile, "if (count%s >=dat%s )\n{%s = 1 ;\n}\nelse\n{\n%s = 0 ;\n}\n}\n", pPrev->data, pPrev->data, pPrev->data, pPrev->data);
         }
@@ -928,29 +946,26 @@ void FinalTextFile(FILE *pFile)
             pMain = pMain->next;                                     // T97
             temparray = StrAllocAndAppend(temparray, pMain->data);   // T97
             temparray1 = StrAllocAndAppend(temparray1, pMain->data); // T97
-             fprintf(pFile, "if (!%sreset )\n{\n ", temparray1);
-            pMain->data = StrAllocAndAppend("vao", pMain->data);     // int vaoT97
-            pMain->data = StrAllocAndAppend(pMain->data, equal);     // int vaoT97 =
-            OutString = StrAllocAndAppend(OutString, " ;\n");        // (I0_1&I0_1) ;\n
-            OutString = StrAllocAndAppend(pMain->data, OutString);   // int vaoT97 = (I0_1&I0_1) ;\n
-            pMain = pMain->next;                                     // 20
-            temparray = StrAllocAndAppend("dat", temparray);         // int datT97
-            temparray = StrAllocAndAppend(temparray, equal);         // int datT97 =
-            temparray = StrAllocAndAppend(temparray, pMain->data);   // int datT97 = 20
-            OutString = StrAllocAndAppend(OutString, temparray);     // int vaoT97_ON = (I0_1&I0_1) ;\n int datT97_ON = 20
+            fprintf(pFile, "if (!%sreset )\n{\n ", temparray1);
+            pMain->data = StrAllocAndAppend("vao", pMain->data);   // int vaoT97
+            pMain->data = StrAllocAndAppend(pMain->data, equal);   // int vaoT97 =
+            OutString = StrAllocAndAppend(OutString, " ;\n");      // (I0_1&I0_1) ;\n
+            OutString = StrAllocAndAppend(pMain->data, OutString); // int vaoT97 = (I0_1&I0_1) ;\n
+            pMain = pMain->next;                                   // 20
+            OutString = StrAllocAndAppend(OutString, temparray);   // int vaoT97_ON = (I0_1&I0_1) ;\n int datT97_ON = 20
             OutString = StrAllocAndAppend(OutString, " ;\n");
             fputs(OutString, pFile);
             fprintf(pFile, "if ( vao%s  )\n{\n", temparray1);
             fprintf(pFile, "if ( count%s >= dat%s  ) \n%s = 1 ;\n", temparray1, temparray1, temparray1);
-            fprintf(pFile, " \nif (%s == 0 )\n{\n", temparray1);
-            fprintf(pFile, "xTimerStart (handle_timer[%d], portMAX_DELAY);\n", CountTimer - 1);
-            fprintf(pFile, "check%s = 0;\n}\n}\n", temparray1);
+            fprintf(pFile, " \nif ((%s == 0) && (check%s ==0) )\n{\n", temparray1, temparray1);
+            fprintf(pFile, "xTimerStart (handle_timerPLC[%d], portMAX_DELAY);\n", CountTimer - 1);
+            fprintf(pFile, "check%s = 1;\n}\n}\n", temparray1);
             fprintf(pFile, "else \n");
-            fprintf(pFile, "{\nif( check%s = 0 )\n{\n", temparray1);
-            fprintf(pFile, "xTimerStop(handle_timer[%d], portMAX_DELAY);\n", CountTimer - 1);
-            fprintf(pFile, "check%s = 1 ;\n}\n%s=0;\ncount%s = 0 ;\n}\n", temparray1, temparray1, temparray1);
-             fprintf(pFile, "\n}\n");
-            fprintf(pFile, "else\n{\nxTimerStop(handle_timer[%d], portMAX_DELAY);\ncount%s = 0;\n%s = 0 ;}\n", CountTimer - 1, temparray1, temparray1);
+            fprintf(pFile, "{\nif( check%s == 1 )\n{\n", temparray1);
+            fprintf(pFile, "xTimerStop(handle_timerPLC[%d], portMAX_DELAY);\n", CountTimer - 1);
+            fprintf(pFile, "check%s = 0 ;\n}\n%s=0;\ncount%s = 0 ;\n}\n", temparray1, temparray1, temparray1);
+            fprintf(pFile, "\n}\n");
+            fprintf(pFile, "else\n{\nxTimerStop(handle_timerPLC[%d], portMAX_DELAY);\ncount%s = 0;\n%s = 0 ;\ncheck%s= 0 ;}\n", CountTimer - 1, temparray1, temparray1, temparray1);
         }
         else if (strcmp(pMain->data, "TOF") == 0)
         {
@@ -976,24 +991,21 @@ void FinalTextFile(FILE *pFile)
             pMain = pMain->next;                                     // T97
             temparray = StrAllocAndAppend(temparray, pMain->data);   // T97
             temparray1 = StrAllocAndAppend(temparray1, pMain->data); // T97
-             fprintf(pFile, "if (!%sreset )\n{\n ", temparray1);
-            pMain->data = StrAllocAndAppend("vao", pMain->data);     // int vaoT97
-            pMain->data = StrAllocAndAppend(pMain->data, equal);     // int vaoT97 =
-            OutString = StrAllocAndAppend(OutString, " ;\n");        // (I0_1&I0_1) ;\n
-            OutString = StrAllocAndAppend(pMain->data, OutString);   // int vaoT97 = (I0_1&I0_1) ;\n
-            pMain = pMain->next;                                     // 20
-            temparray = StrAllocAndAppend("dat", temparray);         // int datT97
-            temparray = StrAllocAndAppend(temparray, equal);         // int datT97 =
-            temparray = StrAllocAndAppend(temparray, pMain->data);   // int datT97 = 20
-            OutString = StrAllocAndAppend(OutString, temparray);     // int vaoT97_ON = (I0_1&I0_1) ;\n int datT97_ON = 20
+            fprintf(pFile, "if (!%sreset )\n{\n ", temparray1);
+            pMain->data = StrAllocAndAppend("vao", pMain->data);   // int vaoT97
+            pMain->data = StrAllocAndAppend(pMain->data, equal);   // int vaoT97 =
+            OutString = StrAllocAndAppend(OutString, " ;\n");      // (I0_1&I0_1) ;\n
+            OutString = StrAllocAndAppend(pMain->data, OutString); // int vaoT97 = (I0_1&I0_1) ;\n
+            pMain = pMain->next;                                   // 20
+            OutString = StrAllocAndAppend(OutString, temparray);   // int vaoT97_ON = (I0_1&I0_1) ;\n int datT97_ON = 20
             OutString = StrAllocAndAppend(OutString, " ;\n");
             fputs(OutString, pFile);
             fprintf(pFile, "if ( vao%s  )\n{\ncount%s = 0 ;\ncheck%sOn = 1 ;\n%s =1 ;\n if ( check%sOff == 1 ||  start%s == 1 )\n{\n", temparray1, temparray1, temparray1, temparray1, temparray1, temparray1);
-            fprintf(pFile, "xTimerStop(handle_timer[%d], portMAX_DELAY);\ncheck%sOff = 0 ;\nstart%s ==0 \n }\n}\n", CountTimer - 1, temparray1, temparray1);
+            fprintf(pFile, "xTimerStop(handle_timerPLC[%d], portMAX_DELAY);\ncheck%sOff = 0 ;\nstart%s =0 \n }\n}\n", CountTimer - 1, temparray1, temparray1);
             fprintf(pFile, " else \n{\ncheck%sOff = 1 ;\nif ( check%sOn == 1 )\n{ \n", temparray1, temparray1);
-            fprintf(pFile, "xTimerStart (handle_timer[%d], portMAX_DELAY); \ncheck%sOn = 0  ; \n}\nif ( count%s >= dat%s ) \n{\n%s = 0 ;\n}\n}\n", CountTimer - 1, temparray1, temparray1, temparray1, temparray1);
-             fprintf(pFile, "\n}\n");
-            fprintf(pFile, "else\n{\nxTimerStop(handle_timer[%d], portMAX_DELAY);\ncount%s = 0;\n%s = 0 ;}\n", CountTimer - 1, temparray1, temparray1);
+            fprintf(pFile, "xTimerStart (handle_timerPLC[%d], portMAX_DELAY); \ncheck%sOn = 0  ; \n}\nif ( count%s >= dat%s ) \n{\n%s = 0 ;\n}\n}\n", CountTimer - 1, temparray1, temparray1, temparray1, temparray1);
+            fprintf(pFile, "\n}\n");
+            fprintf(pFile, "else\n{\nxTimerStop(handle_timerPLC[%d], portMAX_DELAY);\ncount%s = 0;\n%s = 0 ;}\n", CountTimer - 1, temparray1, temparray1);
         }
         else if (strcmp(pMain->data, "TONR") == 0)
         {
@@ -1025,18 +1037,15 @@ void FinalTextFile(FILE *pFile)
             OutString = StrAllocAndAppend(OutString, " ;\n");      // (I0_1&I0_1) ;\n
             OutString = StrAllocAndAppend(pMain->data, OutString); // int vaoT97 = (I0_1&I0_1) ;\n
             pMain = pMain->next;                                   // 20
-            temparray = StrAllocAndAppend("dat", temparray);       // int datT97
-            temparray = StrAllocAndAppend(temparray, equal);       // int datT97 =
-            temparray = StrAllocAndAppend(temparray, pMain->data); // int datT97 = 20
             OutString = StrAllocAndAppend(OutString, temparray);   // int vaoT97_ON = (I0_1&I0_1) ;\n int datT97_ON = 20
             OutString = StrAllocAndAppend(OutString, " ;\n");
             fputs(OutString, pFile);
             fprintf(pFile, "if ( vao%s ) \n{\ncheck%sOn = 1 ;\nif ( check%sOff == 1 || start%s == 1 )\n", temparray1, temparray1, temparray1, temparray1);
-            fprintf(pFile, "{ \nxTimerStart (handle_timer[%d], portMAX_DELAY); \ncheck%sOff = 0 ; \nstart%s = 0 ;\n}\n", CountTimer - 1, temparray1, temparray1);
+            fprintf(pFile, "{ \nxTimerStart (handle_timerPLC[%d], portMAX_DELAY); \ncheck%sOff = 0 ; \nstart%s = 0 ;\n}\n", CountTimer - 1, temparray1, temparray1);
             fprintf(pFile, "if ( (count%s-checkCount%s) >= dat%s) \n{%s = 1 ;\ncheckCount%s = 0 ;\nxTimerStop(handle_timer[%d], portMAX_DELAY);\ncount%s = 0 ;\n}\n}\n", temparray1, temparray1, temparray1, temparray1, temparray1, CountTimer - 1, temparray1);
             fprintf(pFile, "else\n{check%sOff = 1 ;\nif( (!count%s) && (check%sOn == 1 )  )\ncheckCount%s = count%s ;\ncheck%sOn = 0 ;\n}\n", temparray1, temparray1, temparray1, temparray1, temparray1, temparray1);
             fprintf(pFile, "\n}\n");
-            fprintf(pFile, "else\n{\nxTimerStop(handle_timer[%d], portMAX_DELAY);\ncount%s = 0;\n%s = 0 ;}\n", CountTimer - 1, temparray1, temparray1);
+            fprintf(pFile, "else\n{\nxTimerStop(handle_timerPLC[%d], portMAX_DELAY);\ncount%s = 0;\n%s = 0 ;\ncheck%sOff =1\n}\n", CountTimer - 1, temparray1, temparray1,temparray1);
         }
         else if (strcmp(pMain->data, "MOVB") == 0)
         {
@@ -1064,15 +1073,16 @@ void FinalTextFile(FILE *pFile)
             }
             else
             {
-                 pNext = pMain->next ;
-                   fprintf(pFile, "if (%s)\n{\nmemset(&%s,0,%s);\n}\n",OutString,pMain->data,pNext->data );
-            }  
+                pNext = pMain->next;
+                fprintf(pFile, "if (%s)\n{\nmemset(&%s,0,%s);\n}\n", OutString, pMain->data, pNext->data);
+            }
         }
         else if (strcmp(pMain->data, "S") == 0)
-        {        OutString = AddParenthesesIfMissing(OutString);
-                 pMain = pMain->next;
-                 pNext = pMain->next ;
-                fprintf(pFile, "if (%s)\n{\nmemset(&%s,1,%s);\n}\n",OutString,pMain->data,pNext->data );
+        {
+            OutString = AddParenthesesIfMissing(OutString);
+            pMain = pMain->next;
+            pNext = pMain->next;
+            fprintf(pFile, "if (%s)\n{\nmemset(&%s,1,%s);\n}\n", OutString, pMain->data, pNext->data);
         }
         else if ((strncmp(pMain->data, "AW", 2) == 0) || (strncmp(pMain->data, "OW", 2) == 0) || (strncmp(pMain->data, "LDW", 2) == 0)) // AW=
         {
@@ -1119,19 +1129,19 @@ void FinalTextFile(FILE *pFile)
             continue;
         }
         else if (strcmp(pMain->data, "LPS") == 0)
-        {   OutStringLP = "";
-            OutStringLP = StrAllocAndAppend(OutStringLP,OutString);
-        }
-         else if (strcmp(pMain->data, "LPP") == 0)
         {
-            OutString ="";
-            OutString =StrAllocAndAppend(OutString,OutStringLP) ;
-
+            OutStringLP = "";
+            OutStringLP = StrAllocAndAppend(OutStringLP, OutString);
+        }
+        else if (strcmp(pMain->data, "LPP") == 0)
+        {
+            OutString = "";
+            OutString = StrAllocAndAppend(OutString, OutStringLP);
         }
 
         pMain = pMain->next;
     }
-    fprintf(pFile, "\n}\n}\n");
+    fprintf(pFile, " write_Pin_Output();\n}\n}\n");
     if (pFileTimer)
     {
         fprintf(pFileTimer, "\n}\n");
@@ -1167,6 +1177,9 @@ void FileDefineData(void)
     if (CountTimer > 0)
     {
         fprintf(pFile, "void TimerCallBack(TimerHandle_t xTimer);\n");
+
+        fprintf(pFile, "void initTimer(void);\n");
+        fprintf(pFile, "extern TimerHandle_t  handle_timerPLC[%d];\n", CountTimer);
     }
 
     fprintf(pFile, "\n#endif /*INC_CSDL_H_*/");
@@ -1194,7 +1207,7 @@ void FileData(FILE *pFile)
             pMain = pMain->next;
             fprintf(pFile, "volatile static uint8_t %s = 0 ;\n", temp);
             fprintf(pFile, "volatile static uint32_t count%s = 0 ;\n", temp);
-             fprintf(pFile, "volatile static uint32_t %sreset = 0 ;\n", temp);
+            fprintf(pFile, "volatile static uint32_t %sreset = 0 ;\n", temp);
             continue;
         }
         else if (strcmp(pMain->data, "TOF") == 0)
@@ -1385,7 +1398,6 @@ void AddTimerFuntion(FILE *pFile)
                     fprintf(pFile, "case %s:\n", token1);
                     fprintf(pFile, "count%s++ ;\nbreak;\n", token2);
                 }
-
             }
         }
         fprintf(pFile, "}\n}\n");

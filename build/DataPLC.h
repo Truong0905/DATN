@@ -169,41 +169,28 @@
 
 // Define Input Pin
 #define I0_0_PIN GPIO_PIN_
-#define I0_1_PIN GPIO_PIN_
-#define I0_2_PIN GPIO_PIN_
-#define I0_3_PIN GPIO_PIN_
-#define I0_4_PIN GPIO_PIN_
-#define I0_5_PIN GPIO_PIN_
-#define I0_6_PIN GPIO_PIN_
-#define I0_7_PIN GPIO_PIN_
-#define I1_1_PIN GPIO_PIN_
-#define I1_3_PIN GPIO_PIN_
 
 
 // Define Input Port
 #define I0_0_PORT GPIO
-#define I0_1_PORT GPIO
-#define I0_2_PORT GPIO
-#define I0_3_PORT GPIO
-#define I0_4_PORT GPIO
-#define I0_5_PORT GPIO
-#define I0_6_PORT GPIO
-#define I0_7_PORT GPIO
-#define I1_1_PORT GPIO
-#define I1_3_PORT GPIO
 
 
 // Define Output pin
+#define Q0_0_PIN GPIO_PIN_
 #define Q0_1_PIN GPIO_PIN_
 #define Q0_2_PIN GPIO_PIN_
 
 
 // Define Output Port
+#define Q0_0_PORT GPIO
 #define Q0_1_PORT GPIO
 #define Q0_2_PORT GPIO
 
 void read_Pin_Input(void);
 void write_Pin_Output(void);
 void Main_task(void *param) ;
+void TimerCallBack(TimerHandle_t xTimer);
+void initTimer(void);
+extern TimerHandle_t  handle_timerPLC[1];
 
 #endif /*INC_CSDL_H_*/
