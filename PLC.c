@@ -850,7 +850,19 @@ void FinalTextFile(FILE *pFile)
         else if (strcmp(pMain->data, "=") == 0) // q0.1=(A*B)\n
         {
 
-            OutString = AddParenthesesIfMissing(OutString);
+             char *tempCheckOutString ="";
+            char *tokenCkeck ;
+            tempCheckOutString = StrAllocAndAppend(OutString,tempCheckOutString);
+            tokenCkeck = strtok(tempCheckOutString,"=");
+            int sizetokenCkeck = strlen(tokenCkeck);
+            int sizeOutString = strlen(OutString);
+            if  (sizetokenCkeck != sizeOutString )
+            {
+                OutString = "";
+                OutString = StrAllocAndAppend(OutString,tokenCkeck);
+            }
+            else
+             OutString = AddParenthesesIfMissing(OutString);
             OutString = StrAllocAndAppend(OutString, " ;\n");
             OutString = StrAllocAndAppend(pMain->data, OutString);
             pMain = pMain->next;
@@ -929,8 +941,19 @@ void FinalTextFile(FILE *pFile)
                 fprintf(pFileTimer, "{\n");
                 checkTimer = 0;
             }
-            OutString = AddParenthesesIfMissing(OutString);
-
+            char *tempCheckOutString ="";
+            char *tokenCkeck ;
+            tempCheckOutString = StrAllocAndAppend(OutString,tempCheckOutString);
+            tokenCkeck = strtok(tempCheckOutString,"=");
+            int sizetokenCkeck = strlen(tokenCkeck);
+            int sizeOutString = strlen(OutString);
+            if  (sizetokenCkeck != sizeOutString )
+            {
+                OutString = "";
+                OutString = StrAllocAndAppend(OutString,tokenCkeck);
+            }
+            else
+             OutString = AddParenthesesIfMissing(OutString);
             CheckBigBranch = 0;
             CountQuestionMark = 0;
             if (strlen(OutCheckBigBranch) != 0)
@@ -976,7 +999,19 @@ void FinalTextFile(FILE *pFile)
                 fprintf(pFileTimer, "{\n");
                 checkTimer = 0;
             }
-            OutString = AddParenthesesIfMissing(OutString);
+             char *tempCheckOutString ="";
+            char *tokenCkeck ;
+            tempCheckOutString = StrAllocAndAppend(OutString,tempCheckOutString);
+            tokenCkeck = strtok(tempCheckOutString,"=");
+            int sizetokenCkeck = strlen(tokenCkeck);
+            int sizeOutString = strlen(OutString);
+            if  (sizetokenCkeck != sizeOutString )
+            {
+                OutString = "";
+                OutString = StrAllocAndAppend(OutString,tokenCkeck);
+            }
+            else
+             OutString = AddParenthesesIfMissing(OutString);
             CheckBigBranch = 0;
             CountQuestionMark = 0;
             if (strlen(OutCheckBigBranch) != 0)
@@ -1016,7 +1051,19 @@ void FinalTextFile(FILE *pFile)
                 fprintf(pFileTimer, "{\n");
                 checkTimer = 0;
             }
-            OutString = AddParenthesesIfMissing(OutString);
+             char *tempCheckOutString ="";
+            char *tokenCkeck ;
+            tempCheckOutString = StrAllocAndAppend(OutString,tempCheckOutString);
+            tokenCkeck = strtok(tempCheckOutString,"=");
+            int sizetokenCkeck = strlen(tokenCkeck);
+            int sizeOutString = strlen(OutString);
+            if  (sizetokenCkeck != sizeOutString )
+            {
+                OutString = "";
+                OutString = StrAllocAndAppend(OutString,tokenCkeck);
+            }
+            else
+             OutString = AddParenthesesIfMissing(OutString);
             CheckBigBranch = 0;
             CountQuestionMark = 0;
             if (strlen(OutCheckBigBranch) != 0)
@@ -1065,6 +1112,10 @@ void FinalTextFile(FILE *pFile)
         else if (strcmp(pMain->data, "R") == 0)
         {
             OutString = AddParenthesesIfMissing(OutString);
+            char *tempOutString ="";
+            char *token ;
+            tempOutString = StrAllocAndAppend(OutString,tempOutString);
+            token = strtok(tempOutString,"=");
             pMain = pMain->next;
             if (strncmp(pMain->data, "T", 1) == 0)
             {
@@ -1074,15 +1125,31 @@ void FinalTextFile(FILE *pFile)
             else
             {
                 pNext = pMain->next;
-                fprintf(pFile, "if (%s)\n{\nmemset(&%s,0,%s);\n}\n", OutString, pMain->data, pNext->data);
+                if (token)
+                {
+                fprintf(pFile, "if (%s)\n{\nmemset(&%s,0,%s)\n}\n", token, pMain->data, pNext->data);
+                }
+                else
+                fprintf(pFile, "if (%s)\n{\nmemset(&%s,0,%s)\n}\n", OutString, pMain->data, pNext->data);
+
             }
         }
         else if (strcmp(pMain->data, "S") == 0)
         {
             OutString = AddParenthesesIfMissing(OutString);
+             char *tempOutString ="";
+            char *token ;
+            tempOutString = StrAllocAndAppend(OutString,tempOutString);
+            token = strtok(tempOutString,"=");
             pMain = pMain->next;
             pNext = pMain->next;
-            fprintf(pFile, "if (%s)\n{\nmemset(&%s,1,%s);\n}\n", OutString, pMain->data, pNext->data);
+            if (token)
+            {
+            fprintf(pFile, "if (%s)\n{\nmemset(&%s,1,%s);\n}\n", token, pMain->data, pNext->data);
+            }
+            else
+             fprintf(pFile, "if (%s)\n{\nmemset(&%s,1,%s);\n}\n", OutString, pMain->data, pNext->data);
+
         }
         else if ((strncmp(pMain->data, "AW", 2) == 0) || (strncmp(pMain->data, "OW", 2) == 0) || (strncmp(pMain->data, "LDW", 2) == 0)) // AW=
         {
@@ -1133,7 +1200,7 @@ void FinalTextFile(FILE *pFile)
             OutStringLP = "";
             OutStringLP = StrAllocAndAppend(OutStringLP, OutString);
         }
-        else if (strcmp(pMain->data, "LPP") == 0)
+        else if ((strcmp(pMain->data, "LPP") == 0) || (strcmp(pMain->data, "LRD") == 0))
         {
             OutString = "";
             OutString = StrAllocAndAppend(OutString, OutStringLP);
