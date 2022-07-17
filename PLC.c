@@ -1,36 +1,37 @@
 #include "STL.h"
 
 LinkList *First, *Last, *FirstFinal, *LastFinal; // First và Last dùng cho  TransferToList ()   ; FirstFinal , LastFinal  là chuỗi cuối cùng cần tìm
-
 stringHashTable SaveIO[PrimeNumber];
 FILE *pFileTimer = NULL;
 int CountTimer = 0;
 int main(void)
-{
-    FILE *pMainFile = NULL;
-    LinkList *pTest;
+{ 
     int row = 0;
+    // 1. Tạo bảng băm đóng trống
     InitSaveDataIO();
-    pMainFile = ReadTextFile(&row); // Tạo file PLC.txt
-    TransferToList(pMainFile, row);
-    fclose(pMainFile); // Đóng  file PLC.txt
-    FinalList();
+
+    //2.Tạo và đọc địa chỉ file TXT đã xóa comment
+    CreatFileNoComment(&row);
+
+    //3.  Chuyển về List 1 gồm tập hợp các ký tự có loại bỏ các ký tự ko cần thiết
+    CreatList(row);
+
+    // 4. Gom các ký tự câu lệnh (biến) vào 1 data ,
+    //      bổ sung H vào biến thường đóng , bổ xung "sl" nếu là suòn lên hoặc "sx" nếu là sườn xuống
+    EditList();
+
+    // 5 .Lưu các I , Q ,M , T, C vào trong bảng băm
     SaveDataIO();
-    SplitBranchesWithFirstFinalPointer();
-    // pTest = FirstFinal;
-    // while (pTest != NULL)
-    // {
-    //     printf("%s ", pTest->data);
-    //     pTest = pTest->next;
-    // }
-    // for (int i = 0; i < PrimeNumber; i++)
-    // {
-    //     if (strcmp(SaveIO[i], "vacant") != 0 && (strcmp(SaveIO[i], "delete") != 0))
-    //         printf("\n%d .  %s  \n", i, SaveIO[i]);
-    // }
-    FileData(pMainFile);
-    FinalTextFile(pMainFile);
-    AddTimerFuntion(pMainFile);
+
+    // Tách nhánh
+    SplitBranch();
+
+    // 6 .Tao file DataPLC.c với các thành phần phụ trợ
+    FileData();
+    InsertListToFileData();
+    AddTimerFuntion();
+
+    // Tạo file DataPLC.h
     FileDefineData();
     return EXIT_SUCCESS;
 }
@@ -43,7 +44,7 @@ void InitSaveDataIO(void)
     }
 }
 
-FILE *ReadTextFile(int *RowOfFile)
+void CreatFileNoComment(int *RowOfFile)
 {
     FILE *pfile = NULL, *pFileFinal = NULL;
 
@@ -57,7 +58,6 @@ FILE *ReadTextFile(int *RowOfFile)
     if (pfile == NULL)
     {
         printf("Can not open file");
-        return NULL;
     }
     //Đọc từng dòng từ file cho tới khi gặp NULL
     while (fgets(TempArray, 128, pfile) != NULL)
@@ -91,15 +91,15 @@ FILE *ReadTextFile(int *RowOfFile)
 
     fclose(pfile);
     fclose(pFileFinal);
-    return fopen("PLC.txt", "r");
 }
 
-void TransferToList(FILE *pFileFinal, int RowOfFile)
+void CreatList( int RowOfFile)
 {
     LinkList *pMain;
     char TempArray[20];
     First = NULL;
-
+    FILE *pFileFinal ;
+    pFileFinal = fopen("PLC.txt", "r");
     for (int i = 0; i < RowOfFile; i++)
     {
         fgets(TempArray, 20, pFileFinal);
@@ -146,6 +146,7 @@ void TransferToList(FILE *pFileFinal, int RowOfFile)
             }
         }
     }
+    fclose(pFileFinal);
 }
 
 void SaveDataIO(void)
@@ -183,7 +184,7 @@ void SaveDataIO(void)
     }
 }
 
-void FinalList(void)
+void EditList(void)
 {
     LinkList *pMainOfFirst, *pMainOfFirstFinal;
     pMainOfFirst = First;
@@ -251,7 +252,7 @@ void FinalList(void)
     }
 }
 
-void SplitBranchesWithFirstFinalPointer(void)
+void SplitBranch(void)
 {
     LinkList *pCheck, *pMain, *pTemp;
     LinkList *pNext, *pNext1, *pPrev, *pPrev1;
@@ -444,9 +445,10 @@ void SplitBranchesWithFirstFinalPointer(void)
     }
 }
 
-void FinalTextFile(FILE *pFile)
+void InsertListToFileData(void)
 {
     LinkList *pMain, *pNext, *pNext1, *pPrev, *pPrev1;
+    FILE *pFile ;
     pFile = fopen("build/DataPLC.c", "a");
     fprintf(pFile, "while(1)\n{\n");
      fprintf(pFile, "read_Pin_Input();\n");
@@ -654,6 +656,17 @@ void FinalTextFile(FILE *pFile)
         }
         else if ((strcmp(pMain->data, "A") == 0) || (strcmp(pMain->data, "AN") == 0))
         {
+                         char *tempCheckOutString ="";
+            char *tokenCkeck ;
+            tempCheckOutString = StrAllocAndAppend(OutString,tempCheckOutString);
+            tokenCkeck = strtok(tempCheckOutString,"=");
+            int sizetokenCkeck = strlen(tokenCkeck);
+            int sizeOutString = strlen(OutString);
+            if  (sizetokenCkeck != sizeOutString )
+            {
+                OutString = "";
+                OutString = StrAllocAndAppend(OutString,tokenCkeck);
+            }
             pPrev = pMain->prev; // LinkList *pPREV_temp = pPrev;
             pNext = pMain->next;
             pNext1 = pNext->next;
@@ -709,6 +722,17 @@ void FinalTextFile(FILE *pFile)
         }
         else if ((strcmp(pMain->data, "O") == 0) || (strcmp(pMain->data, "ON") == 0))
         {
+                         char *tempCheckOutString ="";
+            char *tokenCkeck ;
+            tempCheckOutString = StrAllocAndAppend(OutString,tempCheckOutString);
+            tokenCkeck = strtok(tempCheckOutString,"=");
+            int sizetokenCkeck = strlen(tokenCkeck);
+            int sizeOutString = strlen(OutString);
+            if  (sizetokenCkeck != sizeOutString )
+            {
+                OutString = "";
+                OutString = StrAllocAndAppend(OutString,tokenCkeck);
+            }
             pPrev = pMain->prev;
             pNext = pMain->next;
             pNext1 = pNext->next;
@@ -1096,6 +1120,17 @@ void FinalTextFile(FILE *pFile)
         }
         else if (strcmp(pMain->data, "MOVB") == 0)
         {
+                        char *tempCheckOutString ="";
+            char *tokenCkeck ;
+            tempCheckOutString = StrAllocAndAppend(OutString,tempCheckOutString);
+            tokenCkeck = strtok(tempCheckOutString,"=");
+            int sizetokenCkeck = strlen(tokenCkeck);
+            int sizeOutString = strlen(OutString);
+            if  (sizetokenCkeck != sizeOutString )
+            {
+                OutString = "";
+                OutString = StrAllocAndAppend(OutString,tokenCkeck);
+            }
             InsertMov(&pMain, OutString, CountQuestionMark, pFile, MOVB_CHECK);
             continue;
         }
@@ -1106,6 +1141,17 @@ void FinalTextFile(FILE *pFile)
         }
         else if (strcmp(pMain->data, "MOVDW") == 0)
         {
+                        char *tempCheckOutString ="";
+            char *tokenCkeck ;
+            tempCheckOutString = StrAllocAndAppend(OutString,tempCheckOutString);
+            tokenCkeck = strtok(tempCheckOutString,"=");
+            int sizetokenCkeck = strlen(tokenCkeck);
+            int sizeOutString = strlen(OutString);
+            if  (sizetokenCkeck != sizeOutString )
+            {
+                OutString = "";
+                OutString = StrAllocAndAppend(OutString,tokenCkeck);
+            }
             InsertMov(&pMain, OutString, CountQuestionMark, pFile, MOVDW_CHECK);
             continue;
         }
@@ -1254,9 +1300,10 @@ void FileDefineData(void)
     fclose(pFile);
 }
 
-void FileData(FILE *pFile)
+void FileData(void)
 {
     LinkList *pMain = FirstFinal;
+    FILE *pFile ;
     system("mkdir build");
     pFile = fopen("build/DataPLC.c", "w");
     if (!pFile)
@@ -1427,10 +1474,12 @@ void FileData(FILE *pFile)
     }
     fclose(pFile);
 }
-void AddTimerFuntion(FILE *pFile)
+void AddTimerFuntion(void)
 {
+    FILE *pFile ;
     if (CountTimer > 0)
     {
+        int check = CountTimer ;
         pFile = fopen("build/DataPLC.c", "a");
         fprintf(pFile, "void TimerCallBack(TimerHandle_t xTimer)\n{\n int id ;\nid = (uint32_t)pvTimerGetTimerID(xTimer) ; \n");
         fprintf(pFile, "switch(id)\n{\n");
@@ -1439,6 +1488,7 @@ void AddTimerFuntion(FILE *pFile)
         {
             if (strncmp(SaveIO[i], "TO", 2) == 0)
             {
+                check -- ;
                 char *token1, *token2;
                 token1 = strtok(SaveIO[i], "_");
                 char *temp = "";
@@ -1465,6 +1515,10 @@ void AddTimerFuntion(FILE *pFile)
                     fprintf(pFile, "case %s:\n", token1);
                     fprintf(pFile, "count%s++ ;\nbreak;\n", token2);
                 }
+            }
+            if(!check)
+            {
+                break;
             }
         }
         fprintf(pFile, "}\n}\n");
