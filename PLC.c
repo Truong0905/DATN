@@ -5,33 +5,48 @@ stringHashTable SaveIO[PrimeNumber];
 FILE *pFileTimer = NULL;
 int CountTimer = 0;
 int main(void)
-{ 
+{
+
     int row = 0;
-    // 1. Tạo bảng băm đóng trống
+    LinkList *p;
+    // 0. Tạo bảng băm đóng trống
     InitSaveDataIO();
 
-    //2.Tạo và đọc địa chỉ file TXT đã xóa comment
+    // 1.Tạo và đọc địa chỉ file TXT đã xóa comment
     CreatFileNoComment(&row);
 
-    //3.  Chuyển về List 1 gồm tập hợp các ký tự có loại bỏ các ký tự ko cần thiết
+    // 2.1  Chuyển về List 1 gồm tập hợp các ký tự có loại bỏ các ký tự ko cần thiết
     CreatList(row);
 
-    // 4. Gom các ký tự câu lệnh (biến) vào 1 data ,
-    //      bổ sung H vào biến thường đóng , bổ xung "sl" nếu là suòn lên hoặc "sx" nếu là sườn xuống
+    // 2.2 Gom các ký tự câu lệnh (biến) vào 1 data ,
+    //      bổ sung ! vào biến thường đóng , bổ xung "sl" nếu là suòn lên hoặc "sx" nếu là sườn xuống
     EditList();
 
-    // 5 .Lưu các I , Q ,M , T, C vào trong bảng băm
+    // 2.3 .Lưu các I , Q ,M , T, C vào trong bảng băm
     SaveDataIO();
+    // for ( int i = 0 ; i< PrimeNumber ; i++)
+    // {
+    //     if (strcmp(SaveIO[i],"vacant") != 0)
+    //     {
+    //         printf("%s ; ",SaveIO[i]);
+    //     }
+    // }
 
-    // Tách nhánh
+    // 2.4Tách nhánh
     SplitBranch();
 
-    // 6 .Tao file DataPLC.c với các thành phần phụ trợ
+    p = FirstFinal;
+    while (p != NULL)
+    {
+        printf("%s ", p->data);
+        p = p->next;
+    }
+    // 3 .Tao file DataPLC.c với các thành phần phụ trợ
     FileData();
     InsertListToFileData();
     AddTimerFuntion();
 
-    // Tạo file DataPLC.h
+    // 4. Tạo file DataPLC.h
     FileDefineData();
     return EXIT_SUCCESS;
 }
@@ -93,12 +108,12 @@ void CreatFileNoComment(int *RowOfFile)
     fclose(pFileFinal);
 }
 
-void CreatList( int RowOfFile)
+void CreatList(int RowOfFile)
 {
     LinkList *pMain;
     char TempArray[20];
     First = NULL;
-    FILE *pFileFinal ;
+    FILE *pFileFinal;
     pFileFinal = fopen("PLC.txt", "r");
     for (int i = 0; i < RowOfFile; i++)
     {
@@ -176,6 +191,11 @@ void SaveDataIO(void)
             H_InsertFunction(pMain->data);
         }
         else if ((strncmp(pMain->data, "CT", 2) == 0))
+        {
+            pMain = pMain->next;
+            H_InsertFunction(pMain->data);
+        }
+        else if ((strncmp(pMain->data, "TO", 2) == 0))
         {
             pMain = pMain->next;
             H_InsertFunction(pMain->data);
@@ -318,8 +338,6 @@ void SplitBranch(void)
             }
             else if ((strncmp(pCheck->data, "LD", 2) == 0) || (strncmp(pCheck->data, "LDN", 3) == 0))
             {
-                pNext = pCheck->next;
-                pNext1 = pNext->next;
                 pPrev = pCheck->prev;
                 pPrev1 = pPrev->prev;
                 if ((strcmp(pPrev1->data, "=") == 0) || (strcmp(pPrev->data, "N") == 0) || (strcmp(pPrev->data, "ALD") == 0) || (strcmp(pPrev->data, "OLD") == 0))
@@ -354,13 +372,6 @@ void SplitBranch(void)
                         InsertPrevElement(&pCheck, &pMain);
                     }
                 }
-                if (strcmp(pNext1->data, "NOT") == 0)
-                {
-                    pMain = (LinkList *)malloc(sizeof(LinkList));
-                    pMain->data = (char *)calloc(4, sizeof(char));
-                    pMain->data = "not\0";
-                    InsertNextElement(&pPrev1, &pMain, &pPrev);
-                }
             }
             else if ((strncmp(pCheck->data, "A", 1) == 0) || (strncmp(pCheck->data, "O", 1) == 0) || (strncmp(pCheck->data, "AN", 2) == 0) || (strncmp(pCheck->data, "ON", 2) == 0))
             {
@@ -383,7 +394,7 @@ void SplitBranch(void)
                 if (strcmp(pNext1->data, "NOT") == 0) // NOT của 1 tập hợp các biến
                 {
                     int check_nhanh = 0;
-                    while (strncmp(pPrev->data, "(", 1) != 0) // Tìm vị trí đầu của nhánh
+                    while (strcmp(pPrev->data, "(") != 0) // Tìm vị trí đầu của nhánh
                     {
                         if ((strcmp(pPrev->data, "ALD") == 0) || (strcmp(pPrev->data, "OLD") == 0)) // nếu đâu là not của (    nhánh và các biến )
                         {
@@ -397,7 +408,7 @@ void SplitBranch(void)
                         if (check_nhanh == 0)
                         {
                             pPrev1 = pPrev->prev;
-                            if (strncmp(pPrev1->data, ")", 1) != 0)
+                            if ((strcmp(pPrev1->data, ")") != 0) && (strcmp(pPrev1->data, "1not") != 0))
                             {
                                 pMain = (LinkList *)malloc(sizeof(LinkList));
                                 pMain->data = (char *)calloc(4, sizeof(char));
@@ -448,10 +459,10 @@ void SplitBranch(void)
 void InsertListToFileData(void)
 {
     LinkList *pMain, *pNext, *pNext1, *pPrev, *pPrev1;
-    FILE *pFile ;
+    FILE *pFile;
     pFile = fopen("build/DataPLC.c", "a");
     fprintf(pFile, "while(1)\n{\n");
-     fprintf(pFile, "read_Pin_Input();\n");
+    fprintf(pFile, "read_Pin_Input();\n");
     char *OutString;
     char *InsertOpeningBracket = "(";
     char *InsertClosingBracket = ")";
@@ -487,61 +498,82 @@ void InsertListToFileData(void)
             continue;
         }
 
-        if (strncmp(pMain->data, "(", 1) == 0)
+        if (strcmp(pMain->data, "(") == 0)
         {
             pPrev = pMain->prev;
             if (pPrev != NULL)
             {
                 pPrev1 = pPrev->prev;
-                if ((strncmp(pPrev->data, "not", 3) != 0) && (strncmp(pPrev->data, "1no", 3) != 0))
+                if ((strcmp(pPrev->data, "not") != 0) && (strcmp(pPrev->data, "1not") != 0))
                 {
                     if (strncmp(pPrev->data, ")", 1) == 0) // Nếu trước  đó sẽ có dấu ")" thì thêm "?" vào giữa 2 dấu
                     {
-                        OutString = StrAllocAndAppend(OutString, InsertQuestionMark);
-                        CountQuestionMark++;
-                        OutString = StrAllocAndAppend(OutString, InsertOpeningBracket);
-                        pMain = pMain->next;
-                        continue;
+                        char *tempOUT = "";
+                        tempOUT = StrAllocAndAppend(tempOUT, OutString);
+                        int a = strlen(tempOUT);
+                        if (((int)tempOUT[a - 1]) != 63) // == "?"
+                        {
+                            OutString = StrAllocAndAppend(OutString, InsertQuestionMark);
+                            CountQuestionMark++;
+                            OutString = StrAllocAndAppend(OutString, InsertOpeningBracket);
+                            pMain = pMain->next;
+                            continue;
+                        }
                     }
                     else
                     {
                         OutString = StrAllocAndAppend(OutString, InsertOpeningBracket);
                     }
                 }
-                else if ((strncmp(pPrev->data, "1not", 3) == 0) || (strncmp(pPrev->data, "not", 3) == 0))
+                else if ((strcmp(pPrev->data, "1not") == 0)) // trước đó có dấu "("
                 {
-                    int search_not = 0;
-
-                    if (pPrev1 == NULL) // Đầu chương trình
+                    char *tempOUT = "";
+                    tempOUT = StrAllocAndAppend(tempOUT, OutString);
+                    int a = strlen(tempOUT);
+                    if (((int)tempOUT[a - 1]) != 63) // == "?"
                     {
+                        OutString = StrAllocAndAppend(OutString, InsertQuestionMark);
+                        CountQuestionMark++;
                         OutString = StrAllocAndAppend(OutString, InsertOpeningBracket);
                         pMain = pMain->next;
                         continue;
                     }
-                    else
+                }
+                else if ((strcmp(pPrev->data, "not") == 0))
+                {
+                    int check_big = 0;
+                    pPrev = pPrev->prev;
+                    if (pPrev != NULL)
                     {
-                        while ((strncmp(pPrev->data, "1not", 3) == 0) || (strncmp(pPrev->data, "not", 3) == 0))
+                        pPrev = pPrev->prev;
+                        while (pPrev)
                         {
-
-                            pPrev = pPrev->prev;
-                            if (pPrev == NULL)
+                            if ((strcmp(pPrev->data, "OLD") == 0) || (strcmp(pPrev->data, "ALD") == 0)) // Nhánh lớn
                             {
+                                check_big = 1;
                                 break;
                             }
-                            if ((strncmp(pPrev->data, "ALD", 3) == 0) || (strncmp(pPrev->data, "OLD", 3) == 0))
+                            pPrev = pPrev->prev;
+                        }
+                        if (check_big)
+                        {
+                            char *tempOUT = "";
+                            tempOUT = StrAllocAndAppend(tempOUT, OutString);
+                            int a = strlen(tempOUT);
+                            if (((int)tempOUT[a - 1]) != 63) // == "?"
                             {
-                                search_not = 1;
+                                OutString = StrAllocAndAppend(OutString, InsertQuestionMark);
+                                CountQuestionMark++;
+                                OutString = StrAllocAndAppend(OutString, InsertOpeningBracket);
+                                pMain = pMain->next;
+                                continue;
                             }
                         }
                     }
-                    if (search_not == 1)
-                    {
-                        OutString = StrAllocAndAppend(OutString, InsertQuestionMark);
-                        CountQuestionMark++;
-                    }
+                }
+                else
+                {
                     OutString = StrAllocAndAppend(OutString, InsertOpeningBracket);
-                    pMain = pMain->next;
-                    continue;
                 }
             }
             else
@@ -549,13 +581,13 @@ void InsertListToFileData(void)
                 OutString = StrAllocAndAppend(OutString, InsertOpeningBracket);
             }
         }
-        else if (strncmp(pMain->data, ")", 1) == 0)
+        else if (strcmp(pMain->data, ")") == 0)
         {
             pNext = pMain->next;
             pNext1 = pNext->next;
-            if ((strncmp(pNext->data, "not", 3) != 0) && (strncmp(pNext->data, "1no", 3) != 0))
+            if ((strcmp(pNext->data, "not") != 0) && (strcmp(pNext->data, "1not") != 0))
             {
-                if (strncmp(pNext->data, "(", 1) == 0) // Nếu sau đó sẽ có dấu "(" thì thêm "?" vào giữa 2 dấu
+                if (strcmp(pNext->data, "(") == 0) // Nếu sau đó sẽ có dấu "(" thì thêm "?" vào giữa 2 dấu
                 {
                     OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
                     OutString = StrAllocAndAppend(OutString, InsertQuestionMark);
@@ -569,13 +601,13 @@ void InsertListToFileData(void)
                     OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
                 }
             }
-            else if (strncmp(pNext->data, "1no", 3) == 0)
+            else if (strcmp(pNext->data, "1not") == 0)
             {
                 OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
                 OutString = StrAllocAndAppend(OutString, InsertQuestionMark);
                 CountQuestionMark++;
 
-                while ((strncmp(pNext1->data, "1no", 3) == 0) || (strncmp(pNext1->data, "not", 3) == 0))
+                while ((strncmp(pNext1->data, "1not", 3) == 0))
                 {
 
                     pNext1 = pNext1->next; // Bỏ qua các phần tử 1not và not
@@ -583,6 +615,10 @@ void InsertListToFileData(void)
 
                 pMain = pNext1;
                 continue;
+            }
+            else
+            {
+                OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
             }
         }
         else if ((strcmp(pMain->data, "LD") == 0) || (strcmp(pMain->data, "LDN") == 0))
@@ -593,15 +629,14 @@ void InsertListToFileData(void)
             pNext1 = pNext->next;
             if (pPrev1 != NULL) // dảm bảo kể cả à đâu chương trình mà có not thì vẫn được xét thêm "!"
             {
-                if ((strncmp(pPrev1->data, "not", 3) == 0) || (strncmp(pPrev1->data, "1no", 3) == 0))
+                if ((strcmp(pPrev1->data, "not") == 0) || (strcmp(pPrev1->data, "1not") == 0))
                 {
                     OutString = StrAllocAndAppend(OutString, "!");
-                    OutString = StrAllocAndAppend(OutString, InsertOpeningBracket);
                     OutString = StrAllocAndAppend(OutString, InsertOpeningBracket);
                     pPrev = pPrev1->prev;
                     if (pPrev != NULL)
                     {
-                        while ((strncmp(pPrev->data, "not", 3) == 0) || (strncmp(pPrev->data, "1no", 3) == 0))
+                        while ((strcmp(pPrev->data, "not") == 0) || (strcmp(pPrev->data, "1not") == 0))
                         {
                             OutString = StrAllocAndAppend(OutString, "!");
                             OutString = StrAllocAndAppend(OutString, InsertOpeningBracket);
@@ -622,9 +657,9 @@ void InsertListToFileData(void)
         {
             static int countEU = 0;
             char *temp = "";
-            char temp1[]="";
+            char temp1[] = "";
             sprintf(temp1, "%d", countEU);
-           OutString = StrAllocAndAppend(OutString,temp1);
+            OutString = StrAllocAndAppend(OutString, temp1);
             pNext->data = StrAllocAndAppend(pNext->data, temp1);
             temp = StrAllocAndAppend(temp, pNext->data); // I0_0sl
             char *tokenEU = strtok(temp, "s");           // I0_0
@@ -640,9 +675,9 @@ void InsertListToFileData(void)
         {
             static int countED = 0;
             char *temp = "";
-            char temp1[]="";
+            char temp1[] = "";
             sprintf(temp1, "%d", countED);
-             OutString = StrAllocAndAppend(OutString,temp1);
+            OutString = StrAllocAndAppend(OutString, temp1);
             pNext->data = StrAllocAndAppend(pNext->data, temp1);
             temp = StrAllocAndAppend(temp, pNext->data); // I0_0sl
             char *tokenED = strtok(temp, "s");           // I0_0
@@ -656,16 +691,16 @@ void InsertListToFileData(void)
         }
         else if ((strcmp(pMain->data, "A") == 0) || (strcmp(pMain->data, "AN") == 0))
         {
-                         char *tempCheckOutString ="";
-            char *tokenCkeck ;
-            tempCheckOutString = StrAllocAndAppend(OutString,tempCheckOutString);
-            tokenCkeck = strtok(tempCheckOutString,"=");
+            char *tempCheckOutString = "";
+            char *tokenCkeck;
+            tempCheckOutString = StrAllocAndAppend(OutString, tempCheckOutString);
+            tokenCkeck = strtok(tempCheckOutString, "=");
             int sizetokenCkeck = strlen(tokenCkeck);
             int sizeOutString = strlen(OutString);
-            if  (sizetokenCkeck != sizeOutString )
+            if (sizetokenCkeck != sizeOutString)
             {
                 OutString = "";
-                OutString = StrAllocAndAppend(OutString,tokenCkeck);
+                OutString = StrAllocAndAppend(OutString, tokenCkeck);
             }
             pPrev = pMain->prev; // LinkList *pPREV_temp = pPrev;
             pNext = pMain->next;
@@ -722,16 +757,16 @@ void InsertListToFileData(void)
         }
         else if ((strcmp(pMain->data, "O") == 0) || (strcmp(pMain->data, "ON") == 0))
         {
-                         char *tempCheckOutString ="";
-            char *tokenCkeck ;
-            tempCheckOutString = StrAllocAndAppend(OutString,tempCheckOutString);
-            tokenCkeck = strtok(tempCheckOutString,"=");
+            char *tempCheckOutString = "";
+            char *tokenCkeck;
+            tempCheckOutString = StrAllocAndAppend(OutString, tempCheckOutString);
+            tokenCkeck = strtok(tempCheckOutString, "=");
             int sizetokenCkeck = strlen(tokenCkeck);
             int sizeOutString = strlen(OutString);
-            if  (sizetokenCkeck != sizeOutString )
+            if (sizetokenCkeck != sizeOutString)
             {
                 OutString = "";
-                OutString = StrAllocAndAppend(OutString,tokenCkeck);
+                OutString = StrAllocAndAppend(OutString, tokenCkeck);
             }
             pPrev = pMain->prev;
             pNext = pMain->next;
@@ -874,19 +909,19 @@ void InsertListToFileData(void)
         else if (strcmp(pMain->data, "=") == 0) // q0.1=(A*B)\n
         {
 
-             char *tempCheckOutString ="";
-            char *tokenCkeck ;
-            tempCheckOutString = StrAllocAndAppend(OutString,tempCheckOutString);
-            tokenCkeck = strtok(tempCheckOutString,"=");
+            char *tempCheckOutString = "";
+            char *tokenCkeck;
+            tempCheckOutString = StrAllocAndAppend(OutString, tempCheckOutString);
+            tokenCkeck = strtok(tempCheckOutString, "=");
             int sizetokenCkeck = strlen(tokenCkeck);
             int sizeOutString = strlen(OutString);
-            if  (sizetokenCkeck != sizeOutString )
+            if (sizetokenCkeck != sizeOutString)
             {
                 OutString = "";
-                OutString = StrAllocAndAppend(OutString,tokenCkeck);
+                OutString = StrAllocAndAppend(OutString, tokenCkeck);
             }
             else
-             OutString = AddParenthesesIfMissing(OutString);
+                OutString = AddParenthesesIfMissing(OutString);
             OutString = StrAllocAndAppend(OutString, " ;\n");
             OutString = StrAllocAndAppend(pMain->data, OutString);
             pMain = pMain->next;
@@ -965,19 +1000,19 @@ void InsertListToFileData(void)
                 fprintf(pFileTimer, "{\n");
                 checkTimer = 0;
             }
-            char *tempCheckOutString ="";
-            char *tokenCkeck ;
-            tempCheckOutString = StrAllocAndAppend(OutString,tempCheckOutString);
-            tokenCkeck = strtok(tempCheckOutString,"=");
+            char *tempCheckOutString = "";
+            char *tokenCkeck;
+            tempCheckOutString = StrAllocAndAppend(OutString, tempCheckOutString);
+            tokenCkeck = strtok(tempCheckOutString, "=");
             int sizetokenCkeck = strlen(tokenCkeck);
             int sizeOutString = strlen(OutString);
-            if  (sizetokenCkeck != sizeOutString )
+            if (sizetokenCkeck != sizeOutString)
             {
                 OutString = "";
-                OutString = StrAllocAndAppend(OutString,tokenCkeck);
+                OutString = StrAllocAndAppend(OutString, tokenCkeck);
             }
             else
-             OutString = AddParenthesesIfMissing(OutString);
+                OutString = AddParenthesesIfMissing(OutString);
             CheckBigBranch = 0;
             CountQuestionMark = 0;
             if (strlen(OutCheckBigBranch) != 0)
@@ -1023,19 +1058,19 @@ void InsertListToFileData(void)
                 fprintf(pFileTimer, "{\n");
                 checkTimer = 0;
             }
-             char *tempCheckOutString ="";
-            char *tokenCkeck ;
-            tempCheckOutString = StrAllocAndAppend(OutString,tempCheckOutString);
-            tokenCkeck = strtok(tempCheckOutString,"=");
+            char *tempCheckOutString = "";
+            char *tokenCkeck;
+            tempCheckOutString = StrAllocAndAppend(OutString, tempCheckOutString);
+            tokenCkeck = strtok(tempCheckOutString, "=");
             int sizetokenCkeck = strlen(tokenCkeck);
             int sizeOutString = strlen(OutString);
-            if  (sizetokenCkeck != sizeOutString )
+            if (sizetokenCkeck != sizeOutString)
             {
                 OutString = "";
-                OutString = StrAllocAndAppend(OutString,tokenCkeck);
+                OutString = StrAllocAndAppend(OutString, tokenCkeck);
             }
             else
-             OutString = AddParenthesesIfMissing(OutString);
+                OutString = AddParenthesesIfMissing(OutString);
             CheckBigBranch = 0;
             CountQuestionMark = 0;
             if (strlen(OutCheckBigBranch) != 0)
@@ -1075,19 +1110,19 @@ void InsertListToFileData(void)
                 fprintf(pFileTimer, "{\n");
                 checkTimer = 0;
             }
-             char *tempCheckOutString ="";
-            char *tokenCkeck ;
-            tempCheckOutString = StrAllocAndAppend(OutString,tempCheckOutString);
-            tokenCkeck = strtok(tempCheckOutString,"=");
+            char *tempCheckOutString = "";
+            char *tokenCkeck;
+            tempCheckOutString = StrAllocAndAppend(OutString, tempCheckOutString);
+            tokenCkeck = strtok(tempCheckOutString, "=");
             int sizetokenCkeck = strlen(tokenCkeck);
             int sizeOutString = strlen(OutString);
-            if  (sizetokenCkeck != sizeOutString )
+            if (sizetokenCkeck != sizeOutString)
             {
                 OutString = "";
-                OutString = StrAllocAndAppend(OutString,tokenCkeck);
+                OutString = StrAllocAndAppend(OutString, tokenCkeck);
             }
             else
-             OutString = AddParenthesesIfMissing(OutString);
+                OutString = AddParenthesesIfMissing(OutString);
             CheckBigBranch = 0;
             CountQuestionMark = 0;
             if (strlen(OutCheckBigBranch) != 0)
@@ -1116,20 +1151,20 @@ void InsertListToFileData(void)
             fprintf(pFile, "if ( (count%s-checkCount%s) >= dat%s) \n{%s = 1 ;\ncheckCount%s = 0 ;\nxTimerStop(handle_timer[%d], portMAX_DELAY);\ncount%s = 0 ;\n}\n}\n", temparray1, temparray1, temparray1, temparray1, temparray1, CountTimer - 1, temparray1);
             fprintf(pFile, "else\n{check%sOff = 1 ;\nif( (!count%s) && (check%sOn == 1 )  )\ncheckCount%s = count%s ;\ncheck%sOn = 0 ;\n}\n", temparray1, temparray1, temparray1, temparray1, temparray1, temparray1);
             fprintf(pFile, "\n}\n");
-            fprintf(pFile, "else\n{\nxTimerStop(handle_timerPLC[%d], portMAX_DELAY);\ncount%s = 0;\n%s = 0 ;\ncheck%sOff =1\n}\n", CountTimer - 1, temparray1, temparray1,temparray1);
+            fprintf(pFile, "else\n{\nxTimerStop(handle_timerPLC[%d], portMAX_DELAY);\ncount%s = 0;\n%s = 0 ;\ncheck%sOff =1\n}\n", CountTimer - 1, temparray1, temparray1, temparray1);
         }
         else if (strcmp(pMain->data, "MOVB") == 0)
         {
-                        char *tempCheckOutString ="";
-            char *tokenCkeck ;
-            tempCheckOutString = StrAllocAndAppend(OutString,tempCheckOutString);
-            tokenCkeck = strtok(tempCheckOutString,"=");
+            char *tempCheckOutString = "";
+            char *tokenCkeck;
+            tempCheckOutString = StrAllocAndAppend(OutString, tempCheckOutString);
+            tokenCkeck = strtok(tempCheckOutString, "=");
             int sizetokenCkeck = strlen(tokenCkeck);
             int sizeOutString = strlen(OutString);
-            if  (sizetokenCkeck != sizeOutString )
+            if (sizetokenCkeck != sizeOutString)
             {
                 OutString = "";
-                OutString = StrAllocAndAppend(OutString,tokenCkeck);
+                OutString = StrAllocAndAppend(OutString, tokenCkeck);
             }
             InsertMov(&pMain, OutString, CountQuestionMark, pFile, MOVB_CHECK);
             continue;
@@ -1141,16 +1176,16 @@ void InsertListToFileData(void)
         }
         else if (strcmp(pMain->data, "MOVDW") == 0)
         {
-                        char *tempCheckOutString ="";
-            char *tokenCkeck ;
-            tempCheckOutString = StrAllocAndAppend(OutString,tempCheckOutString);
-            tokenCkeck = strtok(tempCheckOutString,"=");
+            char *tempCheckOutString = "";
+            char *tokenCkeck;
+            tempCheckOutString = StrAllocAndAppend(OutString, tempCheckOutString);
+            tokenCkeck = strtok(tempCheckOutString, "=");
             int sizetokenCkeck = strlen(tokenCkeck);
             int sizeOutString = strlen(OutString);
-            if  (sizetokenCkeck != sizeOutString )
+            if (sizetokenCkeck != sizeOutString)
             {
                 OutString = "";
-                OutString = StrAllocAndAppend(OutString,tokenCkeck);
+                OutString = StrAllocAndAppend(OutString, tokenCkeck);
             }
             InsertMov(&pMain, OutString, CountQuestionMark, pFile, MOVDW_CHECK);
             continue;
@@ -1158,10 +1193,10 @@ void InsertListToFileData(void)
         else if (strcmp(pMain->data, "R") == 0)
         {
             OutString = AddParenthesesIfMissing(OutString);
-            char *tempOutString ="";
-            char *token ;
-            tempOutString = StrAllocAndAppend(OutString,tempOutString);
-            token = strtok(tempOutString,"=");
+            char *tempOutString = "";
+            char *token;
+            tempOutString = StrAllocAndAppend(OutString, tempOutString);
+            token = strtok(tempOutString, "=");
             pMain = pMain->next;
             if (strncmp(pMain->data, "T", 1) == 0)
             {
@@ -1173,29 +1208,27 @@ void InsertListToFileData(void)
                 pNext = pMain->next;
                 if (token)
                 {
-                fprintf(pFile, "if (%s)\n{\nmemset(&%s,0,%s)\n}\n", token, pMain->data, pNext->data);
+                    fprintf(pFile, "if (%s)\n{\nmemset(&%s,0,%s)\n}\n", token, pMain->data, pNext->data);
                 }
                 else
-                fprintf(pFile, "if (%s)\n{\nmemset(&%s,0,%s)\n}\n", OutString, pMain->data, pNext->data);
-
+                    fprintf(pFile, "if (%s)\n{\nmemset(&%s,0,%s)\n}\n", OutString, pMain->data, pNext->data);
             }
         }
         else if (strcmp(pMain->data, "S") == 0)
         {
             OutString = AddParenthesesIfMissing(OutString);
-             char *tempOutString ="";
-            char *token ;
-            tempOutString = StrAllocAndAppend(OutString,tempOutString);
-            token = strtok(tempOutString,"=");
+            char *tempOutString = "";
+            char *token;
+            tempOutString = StrAllocAndAppend(OutString, tempOutString);
+            token = strtok(tempOutString, "=");
             pMain = pMain->next;
             pNext = pMain->next;
             if (token)
             {
-            fprintf(pFile, "if (%s)\n{\nmemset(&%s,1,%s);\n}\n", token, pMain->data, pNext->data);
+                fprintf(pFile, "if (%s)\n{\nmemset(&%s,1,%s);\n}\n", token, pMain->data, pNext->data);
             }
             else
-             fprintf(pFile, "if (%s)\n{\nmemset(&%s,1,%s);\n}\n", OutString, pMain->data, pNext->data);
-
+                fprintf(pFile, "if (%s)\n{\nmemset(&%s,1,%s);\n}\n", OutString, pMain->data, pNext->data);
         }
         else if ((strncmp(pMain->data, "AW", 2) == 0) || (strncmp(pMain->data, "OW", 2) == 0) || (strncmp(pMain->data, "LDW", 2) == 0)) // AW=
         {
@@ -1303,7 +1336,7 @@ void FileDefineData(void)
 void FileData(void)
 {
     LinkList *pMain = FirstFinal;
-    FILE *pFile ;
+    FILE *pFile;
     system("mkdir build");
     pFile = fopen("build/DataPLC.c", "w");
     if (!pFile)
@@ -1322,79 +1355,6 @@ void FileData(void)
             fprintf(pFile, "volatile static uint8_t %s = 0 ;\n", temp);
             fprintf(pFile, "volatile static uint32_t count%s = 0 ;\n", temp);
             fprintf(pFile, "volatile static uint32_t %sreset = 0 ;\n", temp);
-            continue;
-        }
-        else if (strcmp(pMain->data, "TOF") == 0)
-        {
-            pMain = pMain->next;
-            char *temp = "";
-            temp = StrAllocAndAppend(temp, pMain->data);
-            pMain = pMain->next;
-            fprintf(pFile, "volatile static uint8_t %s = 0 ;\n", temp);
-            fprintf(pFile, "volatile static uint32_t count%s = 0 ;\n", temp);
-            fprintf(pFile, "volatile static uint32_t %sreset = 0 ;\n", temp);
-            continue;
-        }
-        else if (strcmp(pMain->data, "TONR") == 0)
-        {
-            pMain = pMain->next;
-            char *temp = "";
-            temp = StrAllocAndAppend(temp, pMain->data);
-            pMain = pMain->next;
-            fprintf(pFile, "volatile static uint8_t %s = 0 ;\n", temp);
-            fprintf(pFile, "volatile static uint32_t count%s = 0 ;\n", temp);
-            fprintf(pFile, "volatile static uint32_t %sreset = 0 ;\n", temp);
-            continue;
-        }
-        else if (strcmp(pMain->data, "CTU") == 0)
-        {
-            pMain = pMain->next;
-            char *temp = "";
-            temp = StrAllocAndAppend(temp, pMain->data);
-            pMain = pMain->next;
-            fprintf(pFile, "volatile static uint8_t %s = 0 ;\n", temp);
-            fprintf(pFile, "volatile static uint32_t count%s = 0 ;\n", temp);
-            continue;
-        }
-        else if (strcmp(pMain->data, "CTD") == 0)
-        {
-            pMain = pMain->next;
-            char *temp = "";
-            temp = StrAllocAndAppend(temp, pMain->data);
-            pMain = pMain->next;
-            fprintf(pFile, "volatile static uint8_t %s = 0 ;\n", temp);
-            fprintf(pFile, "volatile static uint32_t count%s = 0 ;\n", temp);
-            continue;
-        }
-        else if (strcmp(pMain->data, "CTUD") == 0)
-        {
-            pMain = pMain->next;
-            char *temp = "";
-            temp = StrAllocAndAppend(temp, pMain->data);
-            pMain = pMain->next;
-            fprintf(pFile, "volatile static uint8_t %s = 0 ;\n", temp);
-            fprintf(pFile, "volatile static uint32_t count%s = 0 ;\n", temp);
-            continue;
-        }
-        pMain = pMain->next;
-    }
-    pMain = FirstFinal;
-    fprintf(pFile, "\nvoid read_Pin_Input()\n");
-    readInputPin(pFile, SUM_I);
-
-    fprintf(pFile, "void write_Pin_Output()\n");
-    writeOutputPin(pFile, SUM_Q);
-    fprintf(pFile, "void Main_task( void *param)\n");
-    fprintf(pFile, "{\n");
-
-    while (pMain)
-    {
-        if (strcmp(pMain->data, "TON") == 0)
-        {
-            pMain = pMain->next;
-            char *temp = "";
-            temp = StrAllocAndAppend(temp, pMain->data);
-            pMain = pMain->next;
             fprintf(pFile, "volatile static  uint8_t vao%s = 0 ;\n", temp);
             fprintf(pFile, "volatile static  const uint32_t dat%s = %s;\n", temp, pMain->data);
             fprintf(pFile, "volatile static  uint8_t check%s = 0 ;\n", temp);
@@ -1406,6 +1366,9 @@ void FileData(void)
             char *temp = "";
             temp = StrAllocAndAppend(temp, pMain->data);
             pMain = pMain->next;
+            fprintf(pFile, "volatile static uint8_t %s = 0 ;\n", temp);
+            fprintf(pFile, "volatile static uint32_t count%s = 0 ;\n", temp);
+            fprintf(pFile, "volatile static uint32_t %sreset = 0 ;\n", temp);
             fprintf(pFile, "volatile static  uint8_t vao%s = 0 ;\n", temp);
             fprintf(pFile, "volatile static  const uint32_t dat%s = %s;\n", temp, pMain->data);
             fprintf(pFile, "volatile static  uint8_t check%sOn = 0 ;\n", temp);
@@ -1419,6 +1382,9 @@ void FileData(void)
             char *temp = "";
             temp = StrAllocAndAppend(temp, pMain->data);
             pMain = pMain->next;
+            fprintf(pFile, "volatile static uint8_t %s = 0 ;\n", temp);
+            fprintf(pFile, "volatile static uint32_t count%s = 0 ;\n", temp);
+            fprintf(pFile, "volatile static uint32_t %sreset = 0 ;\n", temp);
             fprintf(pFile, "volatile static  uint8_t vao%s = 0 ;\n", temp);
             fprintf(pFile, "volatile static  const uint32_t dat%s = %s;\n", temp, pMain->data);
             fprintf(pFile, "volatile static  uint8_t check%sOn = 0 ;\n", temp);
@@ -1433,6 +1399,8 @@ void FileData(void)
             char *temp = "";
             temp = StrAllocAndAppend(temp, pMain->data);
             pMain = pMain->next;
+            fprintf(pFile, "volatile static uint8_t %s = 0 ;\n", temp);
+            fprintf(pFile, "volatile static uint32_t count%s = 0 ;\n", temp);
             fprintf(pFile, "volatile static uint8_t vao%s = 0 ;\n", temp);
             fprintf(pFile, "volatile static uint8_t reset%s = 0 ;\n", temp);
             fprintf(pFile, "volatile static const uint32_t dat%s = %s;\n", temp, pMain->data);
@@ -1446,6 +1414,8 @@ void FileData(void)
             char *temp = "";
             temp = StrAllocAndAppend(temp, pMain->data);
             pMain = pMain->next;
+            fprintf(pFile, "volatile static uint8_t %s = 0 ;\n", temp);
+            fprintf(pFile, "volatile static uint32_t count%s = 0 ;\n", temp);
             fprintf(pFile, "volatile static uint8_t vao%s = 0 ;\n", temp);
             fprintf(pFile, "volatile static uint8_t reset%s = 0 ;\n", temp);
             fprintf(pFile, "volatile static const uint32_t dat%s = %s;\n", temp, pMain->data);
@@ -1460,6 +1430,8 @@ void FileData(void)
             char *temp = "";
             temp = StrAllocAndAppend(temp, pMain->data);
             pMain = pMain->next;
+            fprintf(pFile, "volatile static uint8_t %s = 0 ;\n", temp);
+            fprintf(pFile, "volatile static uint32_t count%s = 0 ;\n", temp);
             fprintf(pFile, "volatile static uint8_t tang%s = 0 ;\n", temp);
             fprintf(pFile, "volatile static uint8_t giam%s = 0 ;\n", temp);
             fprintf(pFile, "volatile static uint8_t reset%s = 0 ;\n", temp);
@@ -1469,17 +1441,26 @@ void FileData(void)
             fprintf(pFile, "volatile static uint8_t check%stang = 0 ;\n", temp);
             fprintf(pFile, "volatile static uint8_t check%sgiam = 0 ;\n", temp);
             fprintf(pFile, "volatile static uint8_t nho%s = 0 ;\n", temp);
+            continue;
         }
         pMain = pMain->next;
     }
+    pMain = FirstFinal;
+    fprintf(pFile, "\nvoid read_Pin_Input()\n");
+    readInputPin(pFile, SUM_I);
+    fprintf(pFile, "void write_Pin_Output()\n");
+    writeOutputPin(pFile, SUM_Q);
+    fprintf(pFile, "void Main_task( void *param)\n");
+    fprintf(pFile, "{\n");
+
     fclose(pFile);
 }
 void AddTimerFuntion(void)
 {
-    FILE *pFile ;
+    FILE *pFile;
     if (CountTimer > 0)
     {
-        int check = CountTimer ;
+        int check = CountTimer;
         pFile = fopen("build/DataPLC.c", "a");
         fprintf(pFile, "void TimerCallBack(TimerHandle_t xTimer)\n{\n int id ;\nid = (uint32_t)pvTimerGetTimerID(xTimer) ; \n");
         fprintf(pFile, "switch(id)\n{\n");
@@ -1488,7 +1469,7 @@ void AddTimerFuntion(void)
         {
             if (strncmp(SaveIO[i], "TO", 2) == 0)
             {
-                check -- ;
+                check--;
                 char *token1, *token2;
                 token1 = strtok(SaveIO[i], "_");
                 char *temp = "";
@@ -1516,7 +1497,7 @@ void AddTimerFuntion(void)
                     fprintf(pFile, "count%s++ ;\nbreak;\n", token2);
                 }
             }
-            if(!check)
+            if (!check)
             {
                 break;
             }
