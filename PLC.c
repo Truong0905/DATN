@@ -569,6 +569,14 @@ void InsertListToFileData(void)
                                 continue;
                             }
                         }
+                        else
+                        {
+                            OutString = StrAllocAndAppend(OutString, InsertOpeningBracket);
+                        }
+                    }
+                    else
+                    {
+                        OutString = StrAllocAndAppend(OutString, InsertOpeningBracket);
                     }
                 }
                 else
