@@ -1,0 +1,38 @@
+ORGANIZATION_BLOCK MAIN:OB1
+TITLE=PROGRAM COMMENTS
+BEGIN
+Network 1 
+LD     I0.0
+O      M0.0
+AW<    C2, 2
+=      M0.0
+Network 2 
+LD     M0.0
+TON    T37, 10
+Network 3 
+LD     T37
+EU
+LDW>=  C1, 50
+ON     M0.0
+CTU    C1, 50
+Network 4 
+LDW<=  C1, 20
+A      M0.0
+=      Q0.0
+Network 5 
+LDW>   C1, 20
+AW<=   C1, 25
+A      M0.0
+=      Q0.2
+Network 6 
+LDW>   C1, 25
+A      M0.0
+=      Q0.1
+Network 7 
+LD     T37
+R      T37, 1
+Network 8 
+LD     I0.0
+LD     C2
+CTU    C2, 2
+END_ORGANIZATION_BLOCK
