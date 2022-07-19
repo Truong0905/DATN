@@ -731,7 +731,7 @@ void InsertListToFileData(void)
             {
                 OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
             }
-            if (strncmp(pMain->data, "(", 1) == 0)
+            if (strcmp(pMain->data, "(") == 0)
             {
                 if ((strcmp(pPrev->data, "ALD") != 0) && (strcmp(pPrev->data, "OLD") != 0))
                 {
@@ -748,7 +748,7 @@ void InsertListToFileData(void)
                 OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
             }
 
-            if ((strncmp(pMain->data, ")", 1) == 0) && ((strcmp(pPrev->data, "ALD") == 0) || (strcmp(pPrev->data, "OLD") == 0)))
+            if ((strcmp(pMain->data, ")") == 0) && ((strcmp(pPrev->data, "ALD") == 0) || (strcmp(pPrev->data, "OLD") == 0)))
             {
                 pMain = pMain->next;
             }
@@ -796,7 +796,7 @@ void InsertListToFileData(void)
             {
                 OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
             }
-            if (strncmp(pMain->data, "(", 1) == 0)
+            if (strcmp(pMain->data, "(") == 0)
             {
                 if ((strcmp(pPrev->data, "ALD") != 0) && (strcmp(pPrev->data, "OLD") != 0))
                 {
@@ -813,7 +813,7 @@ void InsertListToFileData(void)
                 OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
             }
 
-            if ((strncmp(pMain->data, ")", 1) == 0) && ((strcmp(pPrev->data, "ALD") == 0) || (strcmp(pPrev->data, "OLD") == 0)))
+            if ((strcmp(pMain->data, ")") == 0) && ((strcmp(pPrev->data, "ALD") == 0) || (strcmp(pPrev->data, "OLD") == 0)))
             {
                 pMain = pMain->next;
             }
@@ -833,7 +833,7 @@ void InsertListToFileData(void)
         {
             CheckCountQuestionMark(&CountQuestionMark, &CheckBigBranch, &OutString, &OutCheckBigBranch);
             AddPlusToOutString(&pMain, &OutString, &CountQuestionMark, InsertMul);
-            if (strncmp(pMain->data, "(", 1) == 0)
+            if (strcmp(pMain->data, "(") == 0)
             {
                 OutString = StrAllocAndAppend(OutString, InsertQuestionMark);
                 CountQuestionMark++;
@@ -858,7 +858,7 @@ void InsertListToFileData(void)
             CheckCountQuestionMark(&CountQuestionMark, &CheckBigBranch, &OutString, &OutCheckBigBranch);
             AddPlusToOutString(&pMain, &OutString, &CountQuestionMark, Insertplus);
 
-            if (strncmp(pMain->data, "(", 1) == 0)
+            if (strcmp(pMain->data, "(") == 0)
             {
                 OutString = StrAllocAndAppend(OutString, InsertQuestionMark);
                 CountQuestionMark++;
@@ -885,12 +885,12 @@ void InsertListToFileData(void)
             OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
             pMain = pMain->next;
             ;
-            if (strncmp(pMain->data, ")", 1) == 0)
+            if (strcmp(pMain->data, ")") == 0)
             {
                 OutString = StrAllocAndAppend(OutString, InsertClosingBracket);
                 pMain = pMain->next;
             }
-            if (strncmp(pMain->data, "(", 1) == 0)
+            if (strcmp(pMain->data, "(") == 0)
             {
                 OutString = StrAllocAndAppend(OutString, InsertQuestionMark);
                 CountQuestionMark++;
@@ -898,7 +898,7 @@ void InsertListToFileData(void)
                 pMain = pMain->next;
                 continue;
             }
-            if (strncmp(pMain->data, "not", 1) == 0)
+            if (strcmp(pMain->data, "not") == 0)
             {
                 OutString = StrAllocAndAppend(OutString, InsertQuestionMark);
                 CountQuestionMark++;
@@ -990,7 +990,7 @@ void InsertListToFileData(void)
             pPrev = pMain->prev; // C3
             fprintf(pFile, "if (reset%s)\n{\nnho%s = 0 ;\ncount%s = 0 ;\n%s = 0 ;\n}\n", pPrev->data, pPrev->data, pPrev->data, pPrev->data);
             fprintf(pFile, "else \n{\n\nif (tang%s)\n{\n", pPrev->data);
-            fprintf(pFile, "if ( ( (check%stang ==1 ) || ( start%stang ==1 ))  && ( count%s <= 4294967295 ))\n ", pPrev->data);
+            fprintf(pFile, "if ( ( (check%stang ==1 ) || ( start%stang ==1 ))  && ( count%s <= 4294967295 ))\n ", pPrev->data,pPrev->data,pPrev->data);
             fprintf(pFile, "{\nnho%s ++  ;\ncount%s = nho%s ;\nstart%stang = 0 ;\n}\n}\n", pPrev->data, pPrev->data, pPrev->data, pPrev->data);
             fprintf(pFile, "else \n{\ncheck%stang = 1 ;\n}\n", pPrev->data);
             fprintf(pFile, "if (giam%s)\n{\n", pPrev->data);
@@ -1315,15 +1315,19 @@ void FileDefineData(void)
 
     fprintf(pFile, "\n#include\"main.h\"\n");
 
-    DefineRegionMemory(pFile, I_MEM, SUM_I);
+    DefineRegionMemory(pFile, I_MEM, SUM_I); // I[2][8]
 
-    DefineRegionMemory(pFile, Q_MEM, SUM_Q);
+    DefineRegionMemory(pFile, Q_MEM, SUM_Q);// Q[2][8]
 
-    DefineRegionMemory(pFile, M_MEM, SUM_M);
-
+    DefineRegionMemory(pFile, M_MEM, SUM_M);//  M[2][8]
+    
     DefineIO(pFile, I_MEM, 2);
+    // Ix_y_PIN GPIO_PIN_k
+    // Ix_y_PORT GPIOx
 
     DefineIO(pFile, Q_MEM, 2);
+    // Qx_y_PIN GPIO_PIN_k
+    // Qx_y_PORT GPIOx
 
     fprintf(pFile, "\nvoid read_Pin_Input(void);\n");
     fprintf(pFile, "void write_Pin_Output(void);\n");
