@@ -35,12 +35,12 @@ int main(void)
     // 2.4Tách nhánh
     SplitBranch();
 
-    p = FirstFinal;
-    while (p != NULL)
-    {
-        printf("%s ", p->data);
-        p = p->next;
-    }
+    // p = FirstFinal;
+    // while (p != NULL)
+    // {
+    //     printf("%s ", p->data);
+    //     p = p->next;
+    // }
     // 3 .Tao file DataPLC.c với các thành phần phụ trợ
     FileData();
     InsertListToFileData();
@@ -1315,17 +1315,17 @@ void FileDefineData(void)
 
     fprintf(pFile, "\n#include\"main.h\"\n");
 
-    DefineRegionMemory(pFile, I_MEM, SUM_I); // I[2][8]
+    DefineRegionMemory(pFile, I_MEM, SUM_I); // I[3][8]
 
-    DefineRegionMemory(pFile, Q_MEM, SUM_Q);// Q[2][8]
+    DefineRegionMemory(pFile, Q_MEM, SUM_Q);// Q[3][8]
 
     DefineRegionMemory(pFile, M_MEM, SUM_M);//  M[2][8]
     
-    DefineIO(pFile, I_MEM, 2);
+    DefineIO(pFile, I_MEM, SUM_I);
     // Ix_y_PIN GPIO_PIN_k
     // Ix_y_PORT GPIOx
 
-    DefineIO(pFile, Q_MEM, 2);
+    DefineIO(pFile, Q_MEM,SUM_Q);
     // Qx_y_PIN GPIO_PIN_k
     // Qx_y_PORT GPIOx
 
@@ -1355,7 +1355,7 @@ void FileData(void)
         printf("Create file  DataPLC.c failed \n");
     fprintf(pFile, "#include\"DataPLC.h\"\n\n");
 
-    fprintf(pFile, "volatile static uint8_t I[2][8]={};\nvolatile static uint8_t Q[2][8]={};\nvolatile static uint8_t M[10][2]={};\n");
+    fprintf(pFile, "volatile static uint8_t I[%d][8]={};\nvolatile static uint8_t Q[%d][8]={};\nvolatile static uint8_t M[%d][8]={};\n",SUM_I,SUM_Q,SUM_M);
     while (pMain)
     {
         if (strcmp(pMain->data, "TON") == 0)
