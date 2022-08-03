@@ -256,14 +256,54 @@ void EditList(void)
             // Nếu là xung sườn lên ta thêm "sl" vào sau biến bằng cách tạo 1 phần tử mới thế vào vị trí của phần tử cũ và xóa phần tử cũ đi
             if (strncmp(token, "EU", 2) == 0)
             {
+                 LinkList *temp1, *temp2, *temp3;
+                temp1 = pMainOfFirstFinal->prev;
+                temp2 = temp1->prev; // temp1 = i0.0 => temp2 = ld
+                static int demEU = 0;
                 char *edge = "sl";
-                InsertEdge(pMainOfFirstFinal, edge);
+                char buffer[] = "";
+                sprintf(buffer, "%d", demEU);
+                edge = StrAllocAndAppend(edge, buffer);
+                char *TempArray2 = StrAllocAndAppend(temp1->data, edge);
+                int SizeOfTempArray2 = strlen(TempArray2);
+                temp3 = (LinkList *)malloc(sizeof(LinkList));
+                // Thay r3 vào r1
+                temp3->next = temp1->next;
+                temp3->prev = temp1->prev;
+                temp2->next = temp3;
+                temp3->data = (char *)calloc(SizeOfTempArray2, sizeof(char));
+                for (int i = 0; i <= SizeOfTempArray2; i++)
+                {
+                    (temp3->data)[i] = TempArray2[i];
+                }
+                free(temp1);
+                demEU++;
             }
             // Nếu là xung sườn xuống  ta thêm "sx" vào sau biến bằng cách tạo 1 phần tử mới thế vào vị trí của phần tử cũ và xóa phần tử cũ đi
             if (strncmp(token, "ED", 2) == 0)
             {
-                char *edge = "sx";
-                InsertEdge(pMainOfFirstFinal, edge);
+                 LinkList *temp1, *temp2, *temp3;
+                temp1 = pMainOfFirstFinal->prev;
+                temp2 = temp1->prev; // temp1 = i0.0 => temp2 = ld
+                static int demED = 0;
+                char *edge = "sl";
+                char buffer[] = "";
+                sprintf(buffer, "%d", demED);
+                edge = StrAllocAndAppend(edge, buffer);
+                char *TempArray2 = StrAllocAndAppend(temp1->data, edge);
+                int SizeOfTempArray2 = strlen(TempArray2);
+                temp3 = (LinkList *)malloc(sizeof(LinkList));
+                // Thay r3 vào r1
+                temp3->next = temp1->next;
+                temp3->prev = temp1->prev;
+                temp2->next = temp3;
+                temp3->data = (char *)calloc(SizeOfTempArray2, sizeof(char));
+                for (int i = 0; i <= SizeOfTempArray2; i++)
+                {
+                    (temp3->data)[i] = TempArray2[i];
+                }
+                free(temp1);
+                demED++;
             }
 
             token = strtok(NULL, " ");
@@ -665,16 +705,13 @@ void InsertListToFileData(void)
         {
             static int countEU = 0;
             char *temp = "";
-            char temp1[] = "";
-            sprintf(temp1, "%d", countEU);
-            OutString = StrAllocAndAppend(OutString, temp1);
-            pNext->data = StrAllocAndAppend(pNext->data, temp1);
             temp = StrAllocAndAppend(temp, pNext->data); // I0_0sl
             char *tokenEU = strtok(temp, "s");           // I0_0
             fprintf(pFile, " volatile uint8_t %s = %s;\n", pNext->data, tokenEU);
-            fprintf(pFile, "volatile static uint8_t checkEU%d = 0 ;\n", countEU);
+            fprintf(pFile, "volatile static uint8_t checkEU%d = 1 ;\n", countEU);
             fprintf(pFile, "if ( !(%s) )\n{\n	checkEU%d = 0 ;\n}\n", tokenEU, countEU);
-            fprintf(pFile, "if ( (!checkEU%d) && (%s) ) \n{\ncheckEU%d = 0 ; \n%s = 1 ;\n}\n", countEU, tokenEU, countEU, pNext->data);
+            fprintf(pFile, "if ( (!checkEU%d) && (%s) ) \n{\ncheckEU%d = 1 ; \n%s = 1 ;\n}\n", countEU, tokenEU, countEU, pNext->data);
+            fprintf(pFile, "else \n{\n%s = 0 ; \n}\n", pNext->data);
             countEU++;
             pMain = pMain->next;
             continue;
@@ -683,16 +720,13 @@ void InsertListToFileData(void)
         {
             static int countED = 0;
             char *temp = "";
-            char temp1[] = "";
-            sprintf(temp1, "%d", countED);
-            OutString = StrAllocAndAppend(OutString, temp1);
-            pNext->data = StrAllocAndAppend(pNext->data, temp1);
-            temp = StrAllocAndAppend(temp, pNext->data); // I0_0sl
-            char *tokenED = strtok(temp, "s");           // I0_0
+            temp = StrAllocAndAppend(temp, pNext->data); 
+            char *tokenED = strtok(temp, "s");           
             fprintf(pFile, " volatile uint8_t %s = %s;\n", pNext->data, tokenED);
-            fprintf(pFile, "volatile static uint8_t checkEU%d = 1 ;\n", countED);
+            fprintf(pFile, "volatile static uint8_t checkEU%d = 0 ;\n", countED);
             fprintf(pFile, "if (%s)\n{\n	checkEU%d = 0 ;\n}\n", tokenED, countED);
-            fprintf(pFile, "if ( (!checkEU%d) && (!(%s)) ) \n{\ncheckEU%d = 0 ; \n%s = 1 ;\n}\n", countED, tokenED, countED, pNext->data);
+            fprintf(pFile, "if ( (!checkEU%d) && (!(%s)) ) \n{\ncheckEU%d = 1 ; \n%s = 1 ;\n}\n", countED, tokenED, countED, pNext->data);
+            fprintf(pFile, "else \n{\n%s = 0 ; \n}\n", pNext->data);
             countED++;
             pMain = pMain->next;
             continue;
@@ -990,7 +1024,7 @@ void InsertListToFileData(void)
             pPrev = pMain->prev; // C3
             fprintf(pFile, "if (reset%s)\n{\nnho%s = 0 ;\ncount%s = 0 ;\n%s = 0 ;\n}\n", pPrev->data, pPrev->data, pPrev->data, pPrev->data);
             fprintf(pFile, "else \n{\n\nif (tang%s)\n{\n", pPrev->data);
-            fprintf(pFile, "if ( ( (check%stang ==1 ) || ( start%stang ==1 ))  && ( count%s <= 4294967295 ))\n ", pPrev->data,pPrev->data,pPrev->data);
+            fprintf(pFile, "if ( ( (check%stang ==1 ) || ( start%stang ==1 ))  && ( count%s <= 4294967295 ))\n ", pPrev->data, pPrev->data, pPrev->data);
             fprintf(pFile, "{\nnho%s ++  ;\ncount%s = nho%s ;\nstart%stang = 0 ;\n}\n}\n", pPrev->data, pPrev->data, pPrev->data, pPrev->data);
             fprintf(pFile, "else \n{\ncheck%stang = 1 ;\n}\n", pPrev->data);
             fprintf(pFile, "if (giam%s)\n{\n", pPrev->data);
@@ -1317,15 +1351,15 @@ void FileDefineData(void)
 
     DefineRegionMemory(pFile, I_MEM, SUM_I); // I[3][8]
 
-    DefineRegionMemory(pFile, Q_MEM, SUM_Q);// Q[3][8]
+    DefineRegionMemory(pFile, Q_MEM, SUM_Q); // Q[3][8]
 
-    DefineRegionMemory(pFile, M_MEM, SUM_M);//  M[2][8]
-    
+    DefineRegionMemory(pFile, M_MEM, SUM_M); //  M[2][8]
+
     DefineIO(pFile, I_MEM, SUM_I);
     // Ix_y_PIN GPIO_PIN_k
     // Ix_y_PORT GPIOx
 
-    DefineIO(pFile, Q_MEM,SUM_Q);
+    DefineIO(pFile, Q_MEM, SUM_Q);
     // Qx_y_PIN GPIO_PIN_k
     // Qx_y_PORT GPIOx
 
@@ -1355,7 +1389,7 @@ void FileData(void)
         printf("Create file  DataPLC.c failed \n");
     fprintf(pFile, "#include\"DataPLC.h\"\n\n");
 
-    fprintf(pFile, "volatile static uint8_t I[%d][8]={};\nvolatile static uint8_t Q[%d][8]={};\nvolatile static uint8_t M[%d][8]={};\n",SUM_I,SUM_Q,SUM_M);
+    fprintf(pFile, "volatile static uint8_t I[%d][8]={};\nvolatile static uint8_t Q[%d][8]={};\nvolatile static uint8_t M[%d][8]={};\n", SUM_I, SUM_Q, SUM_M);
     while (pMain)
     {
         if (strcmp(pMain->data, "TON") == 0)
