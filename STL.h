@@ -28,7 +28,6 @@ void InsertListToFileData(void);
 
 //-----------------------------------EditList--And---SplitBranch-------------------------------------------------------------------------------------------//
 
-void InsertEdge(LinkList *pMainOfFirstFinal, const char *const edge);
 void CreateTheFirstPointerOfList(LinkList *(*pMain), LinkList *(*F), LinkList *(*L));
 void CreateTheElementOfList(LinkList *(*pMain), LinkList *(*L));
 void CreateTheElementOfList(LinkList *(*pMain), LinkList *(*L));
