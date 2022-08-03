@@ -2,25 +2,6 @@
 
 //-----------------------------------FinalList--And---SplitBranchesWithFirstFinalPointer-------------------------------------------------------------------------------------------//
 
-void InsertEdge(LinkList *pMainOfFirstFinal, const char *const edge)
-{
-    LinkList *temp1, *temp2, *temp3;
-    temp1 = pMainOfFirstFinal->prev;
-    temp2 = temp1->prev; // temp1 = i0.0 => temp2 = ld
-    char *TempArray2 = StrAllocAndAppend(temp1->data, edge);
-    int SizeOfTempArray2 = strlen(TempArray2);
-    temp3 = (LinkList *)malloc(sizeof(LinkList));
-    // Thay r3 vào r1
-    temp3->next = temp1->next;
-    temp3->prev = temp1->prev;
-    temp2->next = temp3;
-    temp3->data = (char *)calloc(SizeOfTempArray2, sizeof(char));
-    for (int i = 0; i <= SizeOfTempArray2; i++)
-    {
-        (temp3->data)[i] = TempArray2[i];
-    }
-    free(temp1);
-}
 
 void CreateTheFirstPointerOfList(LinkList *(*pMain), LinkList *(*F), LinkList *(*L))
 {
@@ -52,6 +33,8 @@ void InsertNextElement(LinkList *(*CurrentElement), LinkList *(*Insert), LinkLis
     (*Insert)->next = *NextElement;
     (*NextElement)->prev = *Insert;
 }
+// CurrentElement : Phần tử đang xét
+// Insert : Phần tử chèn 
 void InsertPrevElement(LinkList *(*CurrentElement), LinkList *(*Insert))
 {
     LinkList *PreElement;
@@ -317,11 +300,11 @@ void AddPlusToOutString(LinkList *(*pMain), char *(*OutString), int *CountQuesti
 void SetupCounterUpOrDown(LinkList *(*pMain), char *OutString, FILE *pFile)
 {
     char *TempArry = "";
-    char *equal = " = " ; 
-    char *token = strtok(OutString, "?"); // ( M0_1) < OutString , token >
-    *pMain = (*pMain)->next; // C1 
+    char *equal = " = ";
+    char *token = strtok(OutString, "?");                // ( M0_1) < OutString , token >
+    *pMain = (*pMain)->next;                             // C1
     TempArry = StrAllocAndAppend((*pMain)->data, equal); // C1_CTU
-    TempArry = StrAllocAndAppend("vao", TempArry);// vaoC1_CTU
+    TempArry = StrAllocAndAppend("vao", TempArry);       // vaoC1_CTU
     TempArry = StrAllocAndAppend(TempArry, token);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
     fputs(TempArry, pFile);
@@ -483,10 +466,10 @@ void writeOutputPin(FILE *pFile, int sumOfmem)
             if (Search >= 0)
             {
                 fprintf(pFile, "if(%s >= 1){\n", SaveIO[Search]);
-                fprintf(pFile, "		HAL_GPIO_WritePin(%s_PORT, %s_PIN, ENABLE);\n", SaveIO[Search], SaveIO[Search]);
+                fprintf(pFile, "		HAL_GPIO_WritePin(%s_PORT, %s_PIN, DISABLE);\n", SaveIO[Search], SaveIO[Search]);
                 fprintf(pFile, "		}\n");
                 fprintf(pFile, "	else{\n");
-                fprintf(pFile, "		HAL_GPIO_WritePin(%s_PORT, %s_PIN, DISABLE);\n", SaveIO[Search], SaveIO[Search]);
+                fprintf(pFile, "		HAL_GPIO_WritePin(%s_PORT, %s_PIN, ENABLE);\n", SaveIO[Search], SaveIO[Search]);
                 fprintf(pFile, "	}\n");
             }
         }
@@ -533,7 +516,7 @@ void InsertMov(LinkList *(*pMain), char *OutString, int CountQuestionMark, FILE 
             fprintf(pFile, " (memcpy(&%s,&%s,1)) ; \n", temp->data, (*pMain)->data);
             DeleteLinkList(&(*pMain), &((*pMain)->prev), &((*pMain)->next));
             DeleteLinkList(&temp, &(temp->prev), &(temp->next));
-            (*pMain) = pNext ;
+            (*pMain) = pNext;
             // DeleteLinkList(&pNext, &(pNext->prev), &(pNext->next));
         }
     }
@@ -604,7 +587,7 @@ void InsertTimer(LinkList *pMain, int *CountTimer, FILE *pFileTimer)
     {
         b = 1;
     }
-    else if ((k == 100) || ((97 <= k) && (k<= 99)) || ((33 <= k) && (k<= 36)) || ((1 <= k)&& (k<= 4)) || ((65 <= k) && (k<= 68)))
+    else if ((k == 100) || ((97 <= k) && (k <= 99)) || ((33 <= k) && (k <= 36)) || ((1 <= k) && (k <= 4)) || ((65 <= k) && (k <= 68)))
     {
         b = 10;
     }
@@ -616,8 +599,7 @@ void InsertTimer(LinkList *pMain, int *CountTimer, FILE *pFileTimer)
     pNext = pNext->next; // 20
                          // fprintf(pFileTimer, " handle_timer[%d] =  xTimerCreate(\"timer%s\", pdMS_TO_TICKS(%s*%d),pdFALSE,(void *)(%d+1),%s) ;\n", *CountTimer, buffer, pNext->data, b, *CountTimer, buffer);
     fprintf(pFileTimer, " handle_timerPLC[%d] =  xTimerCreate(\"timer%s\", pdMS_TO_TICKS(%d),pdTRUE,(void *)(%d+1),TimerCallBack) ;\n", *CountTimer, buffer, b, *CountTimer);
-    sprintf(buffer, "%s_%d", buffer, *CountTimer+1);
+    sprintf(buffer, "%s_%d", buffer, *CountTimer + 1);
     H_InsertFunction(buffer);
     (*CountTimer)++;
 }
-
