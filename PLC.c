@@ -24,23 +24,10 @@ int main(void)
 
     // 2.3 .Lưu các I , Q ,M , T, C vào trong bảng băm
     SaveDataIO();
-    // for ( int i = 0 ; i< PrimeNumber ; i++)
-    // {
-    //     if (strcmp(SaveIO[i],"vacant") != 0)
-    //     {
-    //         printf("%s ; ",SaveIO[i]);
-    //     }
-    // }
-
+    
     // 2.4Tách nhánh
     SplitBranch();
 
-    // p = FirstFinal;
-    // while (p != NULL)
-    // {
-    //     printf("%s ", p->data);
-    //     p = p->next;
-    // }
     // 3 .Tao file DataPLC.c với các thành phần phụ trợ
     FileData();
     InsertListToFileData();
@@ -707,11 +694,10 @@ void InsertListToFileData(void)
             char *temp = "";
             temp = StrAllocAndAppend(temp, pNext->data); // I0_0sl
             char *tokenEU = strtok(temp, "s");           // I0_0
-            fprintf(pFile, " volatile uint8_t %s = %s;\n", pNext->data, tokenEU);
+            fprintf(pFile, " volatile uint8_t %s = 0;\n", pNext->data);
             fprintf(pFile, "volatile static uint8_t checkEU%d = 1 ;\n", countEU);
             fprintf(pFile, "if ( !(%s) )\n{\n	checkEU%d = 0 ;\n}\n", tokenEU, countEU);
             fprintf(pFile, "if ( (!checkEU%d) && (%s) ) \n{\ncheckEU%d = 1 ; \n%s = 1 ;\n}\n", countEU, tokenEU, countEU, pNext->data);
-            fprintf(pFile, "else \n{\n%s = 0 ; \n}\n", pNext->data);
             countEU++;
             pMain = pMain->next;
             continue;
@@ -722,11 +708,10 @@ void InsertListToFileData(void)
             char *temp = "";
             temp = StrAllocAndAppend(temp, pNext->data); 
             char *tokenED = strtok(temp, "s");           
-            fprintf(pFile, " volatile uint8_t %s = %s;\n", pNext->data, tokenED);
-            fprintf(pFile, "volatile static uint8_t checkEU%d = 0 ;\n", countED);
+            fprintf(pFile, " volatile uint8_t %s = ;\n", pNext->data);
+            fprintf(pFile, "volatile static uint8_t checkED%d = 0 ;\n", countED);
             fprintf(pFile, "if (%s)\n{\n	checkEU%d = 0 ;\n}\n", tokenED, countED);
             fprintf(pFile, "if ( (!checkEU%d) && (!(%s)) ) \n{\ncheckEU%d = 1 ; \n%s = 1 ;\n}\n", countED, tokenED, countED, pNext->data);
-            fprintf(pFile, "else \n{\n%s = 0 ; \n}\n", pNext->data);
             countED++;
             pMain = pMain->next;
             continue;
@@ -1571,7 +1556,7 @@ void AddTimerFuntion(void)
                 system("del Timer.txt");
             }
         }
-        system("del PLC.txt");
         fclose(pFile);
     }
+    system("del PLC.txt");
 }
