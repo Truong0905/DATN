@@ -7,8 +7,7 @@ int CountTimer = 0;
 int main(void)
 {
 
-    int row = 0;
-    LinkList *p;
+    int row = 0;// Lưu số dòng của file awl
     // 0. Tạo bảng băm đóng trống
     InitSaveDataIO();
 
@@ -24,7 +23,7 @@ int main(void)
 
     // 2.3 .Lưu các I , Q ,M , T, C vào trong bảng băm
     SaveDataIO();
-    
+
     // 2.4Tách nhánh
     SplitBranch();
 
