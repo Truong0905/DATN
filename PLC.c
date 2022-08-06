@@ -7,7 +7,7 @@ int CountTimer = 0;
 int main(void)
 {
 
-    int row = 0;// Lưu số dòng của file awl
+    int row = 0; // Lưu số dòng của file awl
     // 0. Tạo bảng băm đóng trống
     InitSaveDataIO();
 
@@ -159,17 +159,23 @@ void SaveDataIO(void)
         if ((strcmp(pMain->data, "LD") == 0))
         {
             pMain = pMain->next;
-            H_InsertFunction(pMain->data);
+            LinkList *check = pMain->next;
+            if ((strcmp(pMain->data, "ED") != 0) || (strcmp(pMain->data, "EU") != 0))
+                H_InsertFunction(pMain->data);
         }
         else if ((strcmp(pMain->data, "O") == 0))
         {
             pMain = pMain->next;
-            H_InsertFunction(pMain->data);
+            LinkList *check = pMain->next;
+            if ((strcmp(pMain->data, "ED") != 0) || (strcmp(pMain->data, "EU") != 0))
+                H_InsertFunction(pMain->data);
         }
         else if ((strcmp(pMain->data, "A") == 0))
         {
             pMain = pMain->next;
-            H_InsertFunction(pMain->data);
+            LinkList *check = pMain->next;
+            if ((strcmp(pMain->data, "ED") != 0) || (strcmp(pMain->data, "EU") != 0))
+                H_InsertFunction(pMain->data);
         }
         else if ((strcmp(pMain->data, "=") == 0))
         {
@@ -220,8 +226,7 @@ void EditList(void)
                 // Chèn tín hiệu thường đóng vào bảng
                 H_InsertFunction(pMainOfFirstFinal->data);
                 // Chèn tín hiệu thường đóng vào  Link list (!I0_0)
-                pMainOfFirstFinal->data = StrAllocAndAppend("(!", pMainOfFirstFinal->data);
-                pMainOfFirstFinal->data = StrAllocAndAppend(pMainOfFirstFinal->data, ")");
+                pMainOfFirstFinal->data = StrAllocAndAppend("!", pMainOfFirstFinal->data);
                 CheckClose = 0;
             }
             /// Lưu địa chỉ con trỏ FirstFinal và con trỏ LastFinal
@@ -242,8 +247,9 @@ void EditList(void)
             // Nếu là xung sườn lên ta thêm "sl" vào sau biến bằng cách tạo 1 phần tử mới thế vào vị trí của phần tử cũ và xóa phần tử cũ đi
             if (strncmp(token, "EU", 2) == 0)
             {
-                 LinkList *temp1, *temp2, *temp3;
+                LinkList *temp1, *temp2, *temp3;
                 temp1 = pMainOfFirstFinal->prev;
+                H_InsertFunction(temp1->data);
                 temp2 = temp1->prev; // temp1 = i0.0 => temp2 = ld
                 static int demEU = 0;
                 char *edge = "sl";
@@ -268,8 +274,9 @@ void EditList(void)
             // Nếu là xung sườn xuống  ta thêm "sx" vào sau biến bằng cách tạo 1 phần tử mới thế vào vị trí của phần tử cũ và xóa phần tử cũ đi
             if (strncmp(token, "ED", 2) == 0)
             {
-                 LinkList *temp1, *temp2, *temp3;
+                LinkList *temp1, *temp2, *temp3;
                 temp1 = pMainOfFirstFinal->prev;
+                H_InsertFunction(temp1->data);
                 temp2 = temp1->prev; // temp1 = i0.0 => temp2 = ld
                 static int demED = 0;
                 char *edge = "sl";
@@ -691,29 +698,78 @@ void InsertListToFileData(void)
         {
             static int countEU = 0;
             char *temp = "";
+            char *temp1 = "";
+            char *token;
+            char *token1;
+            int size_old = 0;
+            int size_new = 0;
             temp = StrAllocAndAppend(temp, pNext->data); // I0_0sl
-            char *tokenEU = strtok(temp, "s");           // I0_0
-            fprintf(pFile, " volatile uint8_t %s = 0;\n", pNext->data);
-            fprintf(pFile, "volatile static uint8_t checkEU%d = 1 ;\n", countEU);
-            fprintf(pFile, "if ( !(%s) )\n{\n	checkEU%d = 0 ;\n}\n", tokenEU, countEU);
-            fprintf(pFile, "if ( (!checkEU%d) && (%s) ) \n{\ncheckEU%d = 1 ; \n%s = 1 ;\n}\n", countEU, tokenEU, countEU, pNext->data);
-            countEU++;
-            pMain = pMain->next;
-            continue;
+            size_old = strlen(temp);
+            temp1 = StrAllocAndAppend(temp1, pNext->data); // !I0_0sl1
+            token = strtok(temp, "!");
+            size_new = strlen(token);
+            if (size_new == size_old)
+            {
+                char *tokenEU = strtok(temp, "s"); // I0_0
+                fprintf(pFile, " volatile uint8_t %s = 0;\n", pNext->data);
+                fprintf(pFile, "volatile static uint8_t checkEU%d = 1 ;\n", countEU);
+                fprintf(pFile, "if ( !(%s) )\n{\n	checkEU%d = 0 ;\n}\n", tokenEU, countEU);
+                fprintf(pFile, "if ( (!checkEU%d) && (%s) ) \n{\ncheckEU%d = 1 ; \n%s = 1 ;\n}\n", countEU, tokenEU, countEU, pNext->data);
+                countEU++;
+                pMain = pMain->next;
+                continue;
+            }
+            else
+            {
+                token1 = strtok(temp1, "!");
+                fprintf(pFile, " volatile uint8_t %s = 1;\n", token1);
+                char *tokenEU = strtok(temp, "s"); // I0_0
+                fprintf(pFile, "volatile static uint8_t checkEU%d = 1 ;\n", countEU);
+                fprintf(pFile, "if ( !(%s) )\n{\n	checkEU%d = 0 ;\n}\n", tokenEU, countEU);
+                fprintf(pFile, "if ( (!checkEU%d) && (%s) ) \n{\ncheckEU%d = 1 ; \n%s = 0 ;\n}\n", countEU, tokenEU, countEU, token1);
+                countEU++;
+                pMain = pMain->next;
+                continue;
+            }
         }
         else if ((strcmp(pMain->data, "ED") == 0))
         {
             static int countED = 0;
             char *temp = "";
-            temp = StrAllocAndAppend(temp, pNext->data); 
-            char *tokenED = strtok(temp, "s");           
-            fprintf(pFile, " volatile uint8_t %s = ;\n", pNext->data);
-            fprintf(pFile, "volatile static uint8_t checkED%d = 0 ;\n", countED);
-            fprintf(pFile, "if (%s)\n{\n	checkEU%d = 0 ;\n}\n", tokenED, countED);
-            fprintf(pFile, "if ( (!checkEU%d) && (!(%s)) ) \n{\ncheckEU%d = 1 ; \n%s = 1 ;\n}\n", countED, tokenED, countED, pNext->data);
-            countED++;
-            pMain = pMain->next;
-            continue;
+            char *temp1 = "";
+            char *token;
+            char *token1;
+            int size_old = 0;
+            int size_new = 0;
+            temp = StrAllocAndAppend(temp, pNext->data); // I0_0sl
+            size_old = strlen(temp);
+            temp1 = StrAllocAndAppend(temp1, pNext->data); // !I0_0sl1
+            token = strtok(temp, "!");
+            size_new = strlen(token);
+            if (size_new == size_old)
+            {
+
+                char *tokenED = strtok(temp, "s");
+                fprintf(pFile, " volatile uint8_t %s = 1;\n", pNext->data);
+                fprintf(pFile, "volatile static uint8_t checkED%d = 0 ;\n", countED);
+                fprintf(pFile, "if (%s)\n{\n	checkEU%d = 0 ;\n}\n", tokenED, countED);
+                fprintf(pFile, "if ( (!checkEU%d) && (!(%s)) ) \n{\ncheckEU%d = 1 ; \n%s = 1 ;\n}\n", countED, tokenED, countED, pNext->data);
+                countED++;
+                pMain = pMain->next;
+                continue;
+            }
+            else
+            {
+                 token1 = strtok(temp1, "!");
+                fprintf(pFile, " volatile uint8_t %s = 1;\n", token1);
+                char *tokenED = strtok(temp, "s");
+                fprintf(pFile, "volatile static uint8_t checkED%d = 0 ;\n", countED);
+                fprintf(pFile, "if (!(%s))\n{\n	checkEU%d = 0 ;\n}\n", tokenED, countED);
+                fprintf(pFile, "if ( (!checkEU%d) && (!(%s)) ) \n{\ncheckEU%d = 1 ; \n%s = 0 ;\n}\n", countED, tokenED, countED,token1);
+                countED++;
+                pMain = pMain->next;
+                continue;
+            }
         }
         else if ((strcmp(pMain->data, "A") == 0) || (strcmp(pMain->data, "AN") == 0))
         {
