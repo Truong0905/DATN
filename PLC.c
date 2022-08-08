@@ -29,7 +29,14 @@ int main(void)
 
     // 3 .Tao file DataPLC.c với các thành phần phụ trợ
     FileData();
+    LinkList *p = FirstFinal;
+    while (p)
+    {
+        printf("%s ", p->data);
+        p = p->next;
+    }
     InsertListToFileData();
+
     AddTimerFuntion();
 
     // 4. Tạo file DataPLC.h
@@ -553,6 +560,20 @@ void InsertListToFileData(void)
                             continue;
                         }
                     }
+                    else if ((strcmp(pPrev->data, "NOT") == 0))
+                    {
+                        char *tempOUT = "";
+                        tempOUT = StrAllocAndAppend(tempOUT, OutString);
+                        int a = strlen(tempOUT);
+                        if (((int)tempOUT[a - 1]) != 63) // == "?"
+                        {
+                            OutString = StrAllocAndAppend(OutString, InsertQuestionMark);
+                            CountQuestionMark++;
+                            OutString = StrAllocAndAppend(OutString, InsertOpeningBracket);
+                            pMain = pMain->next;
+                            continue;
+                        }
+                    }
                     else
                     {
                         OutString = StrAllocAndAppend(OutString, InsertOpeningBracket);
@@ -760,12 +781,12 @@ void InsertListToFileData(void)
             }
             else
             {
-                 token1 = strtok(temp1, "!");
+                token1 = strtok(temp1, "!");
                 fprintf(pFile, " volatile uint8_t %s = 1;\n", token1);
                 char *tokenED = strtok(temp, "s");
                 fprintf(pFile, "volatile static uint8_t checkED%d = 0 ;\n", countED);
                 fprintf(pFile, "if (!(%s))\n{\n	checkEU%d = 0 ;\n}\n", tokenED, countED);
-                fprintf(pFile, "if ( (!checkEU%d) && (!(%s)) ) \n{\ncheckEU%d = 1 ; \n%s = 0 ;\n}\n", countED, tokenED, countED,token1);
+                fprintf(pFile, "if ( (!checkEU%d) && (!(%s)) ) \n{\ncheckEU%d = 1 ; \n%s = 0 ;\n}\n", countED, tokenED, countED, token1);
                 countED++;
                 pMain = pMain->next;
                 continue;
