@@ -305,12 +305,14 @@ void SetupCounterUpOrDown(LinkList *(*pMain), char *OutString, FILE *pFile)
     *pMain = (*pMain)->next;                             // C1
     TempArry = StrAllocAndAppend((*pMain)->data, equal); // C1_CTU
     TempArry = StrAllocAndAppend("vao", TempArry);       // vaoC1_CTU
+    token = AddParenthesesIfMissing(token);
     TempArry = StrAllocAndAppend(TempArry, token);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
     fputs(TempArry, pFile);
     token = strtok(NULL, "?");
     TempArry = StrAllocAndAppend((*pMain)->data, equal);
     TempArry = StrAllocAndAppend("reset", TempArry);
+    token = AddParenthesesIfMissing(token);
     TempArry = StrAllocAndAppend(TempArry, token);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
     fputs(TempArry, pFile);
@@ -323,18 +325,21 @@ void SetupCounterUpDown(LinkList *(*pMain), char *OutString, FILE *pFile) // "_C
     *pMain = (*pMain)->next;
     TempArry = StrAllocAndAppend((*pMain)->data, " = ");
     TempArry = StrAllocAndAppend("tang", TempArry);
+    token = AddParenthesesIfMissing(token);
     TempArry = StrAllocAndAppend(TempArry, token);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
     fputs(TempArry, pFile);
     token = strtok(NULL, "?");
     TempArry = StrAllocAndAppend((*pMain)->data, " = ");
     TempArry = StrAllocAndAppend(" giam", TempArry);
+    token = AddParenthesesIfMissing(token);
     TempArry = StrAllocAndAppend(TempArry, token);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
     fputs(TempArry, pFile);
     token = strtok(NULL, "?");
     TempArry = StrAllocAndAppend((*pMain)->data, " = ");
     TempArry = StrAllocAndAppend(" reset", TempArry);
+    token = AddParenthesesIfMissing(token);
     TempArry = StrAllocAndAppend(TempArry, token);
     TempArry = StrAllocAndAppend(TempArry, " ;\n");
     fputs(TempArry, pFile);
@@ -445,7 +450,7 @@ void readInputPin(FILE *pFile, int sumOfmem)
             compare = buffer;
             int Search = H_FindFunction(compare);
             if (Search >= 0)
-                fprintf(pFile, "%s = HAL_GPIO_ReadPin(%s_PORT, %s_PIN);\n", SaveIO[Search], SaveIO[Search], SaveIO[Search]);
+                fprintf(pFile, "%s = !HAL_GPIO_ReadPin(%s_PORT, %s_PIN);\n", SaveIO[Search], SaveIO[Search], SaveIO[Search]);
         }
     }
     fprintf(pFile, "}\n");
@@ -466,10 +471,10 @@ void writeOutputPin(FILE *pFile, int sumOfmem)
             if (Search >= 0)
             {
                 fprintf(pFile, "if(%s >= 1){\n", SaveIO[Search]);
-                fprintf(pFile, "		HAL_GPIO_WritePin(%s_PORT, %s_PIN, DISABLE);\n", SaveIO[Search], SaveIO[Search]);
+                fprintf(pFile, "		HAL_GPIO_WritePin(%s_PORT, %s_PIN, ENABLE);\n", SaveIO[Search], SaveIO[Search]);
                 fprintf(pFile, "		}\n");
                 fprintf(pFile, "	else{\n");
-                fprintf(pFile, "		HAL_GPIO_WritePin(%s_PORT, %s_PIN, ENABLE);\n", SaveIO[Search], SaveIO[Search]);
+                fprintf(pFile, "		HAL_GPIO_WritePin(%s_PORT, %s_PIN, DISABLE);\n", SaveIO[Search], SaveIO[Search]);
                 fprintf(pFile, "	}\n");
             }
         }
